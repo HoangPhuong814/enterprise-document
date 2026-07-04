@@ -1,0 +1,4 @@
+# Custom ignore
+application.yml
+application-dev.yml
+.env

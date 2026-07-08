@@ -8,8 +8,7 @@ import backend.example.backend.modules.auth.dto.IntrospectRequest;
 import backend.example.backend.modules.auth.dto.IntrospectResponse;
 import backend.example.backend.modules.auth.dto.RefreshRequest;
 import backend.example.backend.modules.auth.dto.LogoutRequest;
-import backend.example.backend.modules.user.User;
-import backend.example.backend.modules.user.UserRepository;
+import backend.example.backend.modules.user.*;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import java.util.concurrent.TimeUnit;
 import com.nimbusds.jose.*;
@@ -167,6 +166,16 @@ public class AuthenticationService {
     private String buildScope(User user)
     {
         StringJoiner stringJoiner = new StringJoiner(" ");
+        if (user.getRoles() != null) {
+            for (Role role : user.getRoles()) {
+                stringJoiner.add("ROLE_" + role.getName());
+                if (role.getPermissions() != null) {
+                    for (Permission permission : role.getPermissions()) {
+                        stringJoiner.add(permission.getName());
+                    }
+                }
+            }
+        }
         return stringJoiner.toString();
     }
 

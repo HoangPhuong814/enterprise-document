@@ -26,18 +26,17 @@ public class CustomJWTDecoder implements JwtDecoder {
     private NimbusJwtDecoder nimbusJwtDecoder = null;
     @Override
     public Jwt decode(String token) throws JwtException {
-        try{
+        try {
             var response = authenticationService.introspect(IntrospectRequest.builder()
                     .token(token)
                     .build());
-            if(!response.getValid())
-            {
+            if (!response.getValid()) {
                 throw new JwtException("Token invalid");
             }
-        }
-        catch (Exception e)
-        {
-            System.out.println("Failed to check token: " + e.getMessage());
+        } catch (JwtException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new JwtException("Token verification failed: " + e.getMessage(), e);
         }
 
         if(Objects.isNull(nimbusJwtDecoder))

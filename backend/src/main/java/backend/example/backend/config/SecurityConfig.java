@@ -22,10 +22,10 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableMethodSecurity
 public class SecurityConfig {
     private final String[] PUBLIC_GET_ENDPOINTS = {
-            "/test", "/auth/introspect",
+            "/test"
     };
     private final String[] PUBLIC_POST_ENDPOINTS = {
-            "/users/create"
+            "/users/create", "/auth/login", "/auth/introspect", "/auth/refresh", "/auth/logout"
     };
 
     @Autowired

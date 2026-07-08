@@ -15,7 +15,10 @@ public enum ErrorCode {
     UNAUTHORIZED(1002, "You do not have permission", HttpStatus.FORBIDDEN),
     USER_EXISTED(1002, "User existed", HttpStatus.BAD_REQUEST),
     USER_NOT_EXISTED(1003, "User not existed", HttpStatus.NOT_FOUND),
-    INVALID_PASSWORD(1004, "Invalid password",HttpStatus.BAD_REQUEST);
+    INVALID_PASSWORD(1004, "Invalid password",HttpStatus.BAD_REQUEST),
+    PERMISSION_EXISTED(1005, "Permission already exists", HttpStatus.BAD_REQUEST),
+    ROLE_EXISTED(1006, "Role already exists", HttpStatus.BAD_REQUEST),
+    ROLE_NOT_EXISTED(1007, "Role not existed", HttpStatus.NOT_FOUND);
 
     int code;
     String message;

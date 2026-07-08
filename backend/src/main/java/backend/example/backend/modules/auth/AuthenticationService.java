@@ -6,8 +6,12 @@ import backend.example.backend.modules.auth.dto.AuthenticationRequest;
 import backend.example.backend.modules.auth.dto.AuthenticationResponse;
 import backend.example.backend.modules.auth.dto.IntrospectRequest;
 import backend.example.backend.modules.auth.dto.IntrospectResponse;
+import backend.example.backend.modules.auth.dto.RefreshRequest;
+import backend.example.backend.modules.auth.dto.LogoutRequest;
 import backend.example.backend.modules.user.User;
 import backend.example.backend.modules.user.UserRepository;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import java.util.concurrent.TimeUnit;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
@@ -38,6 +42,7 @@ public class AuthenticationService {
     protected String signerKey;
 
     UserRepository userRepository;
+    StringRedisTemplate stringRedisTemplate;
 
     public IntrospectResponse introspect(IntrospectRequest request)
     {
@@ -64,9 +69,10 @@ public class AuthenticationService {
 
         String jit = signedJWT.getJWTClaimsSet().getJWTID();
 
-        if(!verified || expiryTime.before(new Date()))
+        if(!verified || expiryTime.before(new Date()) ||
+                Boolean.TRUE.equals(stringRedisTemplate.hasKey("blacklist:" + jit)))
         {
-            throw new RuntimeException("Unauthenticated");
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
 
         return signedJWT;
@@ -92,13 +98,48 @@ public class AuthenticationService {
         }
 
         var token = generateToken(user);
+        var refreshToken = generateRefreshToken(user);
+
+        try {
+            String refreshJti = SignedJWT.parse(refreshToken).getJWTClaimsSet().getJWTID();
+            stringRedisTemplate.opsForValue().set(
+                "refreshToken:" + refreshJti,
+                user.getEmail(),
+                24,
+                TimeUnit.HOURS
+            );
+        } catch (ParseException e) {
+            throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
+        }
 
         return AuthenticationResponse.builder()
                 .token(token)
+                .refreshToken(refreshToken)
                 .authenticated(true)
                 .build();
     }
 
+    public String generateRefreshToken(User user)
+    {
+        JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
+        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
+                .subject(user.getEmail())
+                .issuer("docHub")
+                .issueTime(new Date())
+                .expirationTime(new Date(Instant.now().plus(24, ChronoUnit.HOURS).toEpochMilli()))
+                .jwtID(UUID.randomUUID().toString())
+                .build();
+        Payload payload = new Payload(claimsSet.toJSONObject());
+
+        JWSObject jwsObject = new JWSObject(header, payload);
+        try {
+            jwsObject.sign(new MACSigner(signerKey.getBytes()));
+            return jwsObject.serialize();
+        }
+        catch (JOSEException e) {
+            throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
+        }
+    }
 
     public String generateToken(User user)
     {
@@ -127,5 +168,71 @@ public class AuthenticationService {
     {
         StringJoiner stringJoiner = new StringJoiner(" ");
         return stringJoiner.toString();
+    }
+
+    public void logout(LogoutRequest request) {
+        try {
+            var signedAccessToken = verifyToken(request.getToken());
+            String accessJti = signedAccessToken.getJWTClaimsSet().getJWTID();
+            Date expiryTime = signedAccessToken.getJWTClaimsSet().getExpirationTime();
+            long ttlMillis = expiryTime.getTime() - System.currentTimeMillis();
+            if (ttlMillis > 0) {
+                stringRedisTemplate.opsForValue().set(
+                    "blacklist:" + accessJti,
+                    "true",
+                    ttlMillis,
+                    TimeUnit.MILLISECONDS
+                );
+            }
+        } catch (Exception e) {
+            // Access token already invalid/expired, proceed
+        }
+
+        try {
+            var signedRefreshToken = verifyToken(request.getRefreshToken());
+            String refreshJti = signedRefreshToken.getJWTClaimsSet().getJWTID();
+            stringRedisTemplate.delete("refreshToken:" + refreshJti);
+        } catch (Exception e) {
+            // Refresh token already invalid/expired, proceed
+        }
+    }
+
+    public AuthenticationResponse refreshToken(RefreshRequest request) {
+        try {
+            var signedRefreshToken = verifyToken(request.getRefreshToken());
+            String refreshJti = signedRefreshToken.getJWTClaimsSet().getJWTID();
+            String email = signedRefreshToken.getJWTClaimsSet().getSubject();
+
+            String storedEmail = stringRedisTemplate.opsForValue().get("refreshToken:" + refreshJti);
+            if (storedEmail == null) {
+                throw new AppException(ErrorCode.UNAUTHENTICATED);
+            }
+
+            stringRedisTemplate.delete("refreshToken:" + refreshJti);
+
+            var user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+            var newAccessToken = generateToken(user);
+            var newRefreshToken = generateRefreshToken(user);
+
+            String newRefreshJti = SignedJWT.parse(newRefreshToken).getJWTClaimsSet().getJWTID();
+            stringRedisTemplate.opsForValue().set(
+                "refreshToken:" + newRefreshJti,
+                user.getEmail(),
+                24,
+                TimeUnit.HOURS
+            );
+
+            return AuthenticationResponse.builder()
+                .token(newAccessToken)
+                .refreshToken(newRefreshToken)
+                .authenticated(true)
+                .build();
+        } catch (AppException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
+        }
     }
 }

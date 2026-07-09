@@ -7,7 +7,10 @@ spring:
     username: ${DB_USER}
     password: ${DB_PASSWORD}
     driver-class-name: ${DB_DRIVER_CLASS}
-
+  servlet:
+    multipart:
+      max-file-size: ${MAX_FILE_SIZE}
+      max-request-size: ${MAX_REQUEST_SIZE}
   jpa:
     hibernate:
       ddl-auto: ${DDL_AUTO}

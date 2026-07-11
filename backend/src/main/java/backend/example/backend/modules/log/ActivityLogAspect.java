@@ -47,7 +47,59 @@ public class ActivityLogAspect {
             activityLogRepository.save(activityLog);
 
         } catch (Exception e) {
-            log.error("Error: ", e);
+            log.error("Error when upload: ", e);
+        }
+    }
+
+    @AfterReturning(
+            pointcut = "execution(* backend.example.backend.modules.document.DocumentController.getDownloadUrl(..) " +
+                    "&& args(id))",
+            returning = "result"
+
+    )
+    public void logDownloadAction(Long id, Object result)
+    {
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            String email = (auth != null) ? auth.getName() : "Anonymous";
+
+            ActivityLog activityLog = ActivityLog.builder()
+                    .userEmail(email)
+                    .action("DOWNLOAD_DOCUMENT")
+                    .documentName("FILE ID: " + id)
+                    .timestamp(LocalDateTime.now())
+                    .build();
+
+            activityLogRepository.save(activityLog);
+        }
+        catch (Exception e) {
+            log.error("Error when download: " + e);
+        }
+    }
+
+    @AfterReturning(
+            pointcut = "execution(* backend.example.backend.modules.document.DocumentController.deleteDocument(..) " +
+                    "&& args(id))",
+            returning = "result"
+
+    )
+    public void logDeleteAction(Long id, Object result)
+    {
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            String email = (auth != null) ? auth.getName() : "Anonymous";
+
+            ActivityLog activityLog = ActivityLog.builder()
+                    .userEmail(email)
+                    .action("DELETE_DOCUMENT")
+                    .documentName("FILE ID: " + id)
+                    .timestamp(LocalDateTime.now())
+                    .build();
+
+            activityLogRepository.save(activityLog);
+        }
+        catch (Exception e) {
+            log.error("Error when delete: " + e);
         }
     }
 }

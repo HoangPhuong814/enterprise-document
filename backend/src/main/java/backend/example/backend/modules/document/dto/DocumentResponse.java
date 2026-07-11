@@ -22,7 +22,7 @@ public class DocumentResponse {
     @AllArgsConstructor
     @FieldDefaults(level = AccessLevel.PRIVATE)
     public static class UploaderInfo {
-        Long id;
+        String id;
         String email;
         String fullName;
     }

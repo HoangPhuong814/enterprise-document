@@ -37,6 +37,7 @@ public class S3StorageService {
     AmazonS3 amazonS3;
     DocumentRepository documentRepository;
     UserRepository userRepository;
+    CategoryRepository categoryRepository;
     DocumentMapper documentMapper;
 
     @Value("${aws.s3.bucket-name}")
@@ -44,9 +45,15 @@ public class S3StorageService {
     String bucketName;
 
     @Transactional
-    public Document uploadDocument(MultipartFile file, String uploaderEmail) {
+    public Document uploadDocument(MultipartFile file, String uploaderEmail, Long categoryId) {
         User user = userRepository.findByEmail(uploaderEmail)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        Category category = null;
+        if (categoryId != null) {
+            category = categoryRepository.findById(categoryId)
+                    .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
+        }
 
         String originalFileName = file.getOriginalFilename();
         String uniqueFileName = UUID.randomUUID() + "_" + originalFileName;
@@ -65,6 +72,7 @@ public class S3StorageService {
                     .fileSize(file.getSize())
                     .s3Url(fileUrl)
                     .uploader(user)
+                    .category(category)
                     .build();
             return documentRepository.save(document);
 
@@ -76,7 +84,7 @@ public class S3StorageService {
 
     public String generatePresignedUrl(Long documentId)
     {
-        Document document = documentRepository.findById(documentId)
+        Document document = documentRepository.findByIdAndIsDeletedFalse(documentId)
                 .orElseThrow(()-> new AppException(ErrorCode.DOCUMENT_NOT_FOUND));
 
         String s3Url = document.getS3Url();
@@ -98,13 +106,12 @@ public class S3StorageService {
     }
 
     public PageResponse<DocumentResponse> getDocuments(String sortBy, String sortDir, int page, int size) {
-        // 1. Thiết lập cấu hình sắp xếp (Tăng dần hoặc giảm dần)
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
                 ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
 
         Pageable pageable = PageRequest.of(page - 1, size, sort);
-        Page<Document> pageData = documentRepository.findAll(pageable);
+        Page<Document> pageData = documentRepository.findAllByIsDeletedFalse(pageable);
 
         var documentResponses = pageData.getContent().stream()
                 .map(documentMapper::toDocumentResponse)
@@ -119,13 +126,56 @@ public class S3StorageService {
                 .build();
     }
 
+    @Transactional
     public void deleteDocument(Long id) {
+        Document document = documentRepository.findByIdAndIsDeletedFalse(id)
+                .orElseThrow(() -> new AppException(ErrorCode.DOCUMENT_NOT_FOUND));
+
+        document.setDeleted(true);
+        document.setDeletedAt(java.time.LocalDateTime.now());
+        documentRepository.save(document);
+    }
+
+    public PageResponse<DocumentResponse> getTrashDocuments(String sortBy, String sortDir, int page, int size) {
+        Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
+                ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
+        Page<Document> pageData = documentRepository.findAllByIsDeletedTrue(pageable);
+
+        var documentResponses = pageData.getContent().stream()
+                .map(documentMapper::toDocumentResponse)
+                .toList();
+
+        return PageResponse.<DocumentResponse>builder()
+                .currentPage(page)
+                .totalPages(pageData.getTotalPages())
+                .pageSize(size)
+                .totalElements(pageData.getTotalElements())
+                .data(documentResponses)
+                .build();
+    }
+
+    @Transactional
+    public void restoreDocument(Long id) {
         Document document = documentRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.DOCUMENT_NOT_FOUND));
 
-        // 2. Trích xuất S3 Key từ URL
-        // Ví dụ url: https://bucket.s3.amazonaws.com/uuid_pupy.jpg
-        // -> Cắt lấy phần sau dấu gạch chéo cuối cùng: uuid_pupy.jpg
+        if (!document.isDeleted()) {
+            return; // Nếu chưa xóa thì không cần khôi phục
+        }
+
+        document.setDeleted(false);
+        document.setDeletedAt(null);
+        documentRepository.save(document);
+    }
+
+    @Transactional
+    public void hardDeleteDocument(Long id) {
+        Document document = documentRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.DOCUMENT_NOT_FOUND));
+
         String s3Url = document.getS3Url();
         String s3Key = s3Url.substring(s3Url.lastIndexOf("/") + 1);
 

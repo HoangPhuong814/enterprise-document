@@ -35,4 +35,16 @@ public class Document extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "uploader_id", nullable = false)
     User uploader;
+
+    // Liên kết với danh mục (Nhiều Document thuộc về 1 Category)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    Category category;
+
+    @Column(name = "is_deleted", nullable = false, columnDefinition = "boolean default false")
+    @Builder.Default
+    boolean isDeleted = false;
+
+    @Column(name = "deleted_at")
+    java.time.LocalDateTime deletedAt;
 }

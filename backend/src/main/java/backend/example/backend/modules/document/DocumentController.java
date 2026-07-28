@@ -19,10 +19,11 @@ public class DocumentController {
     DocumentMapper documentMapper;
     @PostMapping("/upload")
     public ApiResponse<DocumentResponse> uploadFile(@RequestParam("file") MultipartFile file,
-                                                    Authentication authentication)
+                                                     @RequestParam(value = "categoryId", required = false) Long categoryId,
+                                                     Authentication authentication)
     {
         String email = authentication.getName();
-        Document document = s3StorageService.uploadDocument(file, email);
+        Document document = s3StorageService.uploadDocument(file, email, categoryId);
 
         return ApiResponse.<DocumentResponse>builder()
                 .result(documentMapper.toDocumentResponse(document))
@@ -64,6 +65,38 @@ public class DocumentController {
 
         return ApiResponse.<Void>builder()
                 .message("Delete document successfully")
+                .build();
+    }
+
+    @GetMapping("/trash")
+    public ApiResponse<PageResponse<DocumentResponse>> getTrashDocuments(
+            @RequestParam(value = "page", defaultValue = "1", required = false) int page,
+            @RequestParam(value = "size", defaultValue = "10", required = false) int size,
+            @RequestParam(value = "sortBy", defaultValue = "deletedAt", required = false) String sortBy,
+            @RequestParam(value = "sortDir", defaultValue = "desc", required = false) String sortDir) {
+
+        PageResponse<DocumentResponse> pageResponse = s3StorageService.getTrashDocuments(
+                sortBy, sortDir, page, size);
+
+        return ApiResponse.<PageResponse<DocumentResponse>>builder()
+                .result(pageResponse)
+                .message("Get trash documents successfully")
+                .build();
+    }
+
+    @PutMapping("/{id}/restore")
+    public ApiResponse<Void> restoreDocument(@PathVariable Long id) {
+        s3StorageService.restoreDocument(id);
+        return ApiResponse.<Void>builder()
+                .message("Restore document successfully")
+                .build();
+    }
+
+    @DeleteMapping("/{id}/permanent")
+    public ApiResponse<Void> hardDeleteDocument(@PathVariable Long id) {
+        s3StorageService.hardDeleteDocument(id);
+        return ApiResponse.<Void>builder()
+                .message("Permanent delete document successfully")
                 .build();
     }
 }

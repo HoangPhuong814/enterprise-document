@@ -3,12 +3,15 @@ package backend.example.backend.modules.document;
 import backend.example.backend.modules.document.dto.DocumentResponse;
 import backend.example.backend.modules.user.User;
 import org.mapstruct.Mapper;
-
-import java.util.List;
+import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface DocumentMapper {
     DocumentResponse toDocumentResponse(Document document);
+
+    @Mapping(source = "name", target = "fullName")
     DocumentResponse.UploaderInfo toUploaderInfo(User user);
-    List<DocumentResponse> toDocumentResponseList(List<Document> documents);
+
+    DocumentResponse.CategoryInfo toCategoryInfo(Category category);
+    java.util.List<DocumentResponse> toDocumentResponseList(java.util.List<Document> documents);
 }

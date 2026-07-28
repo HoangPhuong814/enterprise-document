@@ -15,6 +15,7 @@ public class DocumentResponse {
     Long fileSize;
     String s3Url;
     UploaderInfo uploader;
+    CategoryInfo category;
 
     @Data
     @Builder
@@ -25,5 +26,15 @@ public class DocumentResponse {
         String id;
         String email;
         String fullName;
+    }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @FieldDefaults(level = AccessLevel.PRIVATE)
+    public static class CategoryInfo {
+        Long id;
+        String name;
     }
 }

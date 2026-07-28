@@ -25,8 +25,6 @@ Dự án được tối ưu và thiết kế để giải quyết các bài toá
 5. **Thông báo thời gian thực (Real-time Alert):** Tự động phát thông báo tới chủ sở hữu qua kết nối WebSockets ngay khi có người khác tải file qua link chia sẻ của họ.
 6. **Thùng rác & khôi phục (Trash Bin):** Hỗ trợ cơ chế xóa tạm thời (Soft Delete), phục hồi và xóa vĩnh viễn (Hard Delete khỏi DB & AWS S3).
 
-> [!NOTE]
-> Dự án này là minh chứng lý tưởng cho hồ sơ xin việc (CV) ở vị trí **Backend Developer / Fullstack Developer (Intern/Fresher/Junior)** nhờ áp dụng các cấu trúc thiết kế chuẩn chỉ và công nghệ thực tiễn phổ biến tại các doanh nghiệp lớn.
 
 ---
 

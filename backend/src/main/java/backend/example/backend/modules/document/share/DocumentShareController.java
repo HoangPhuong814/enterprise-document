@@ -32,4 +32,20 @@ public class DocumentShareController {
                 .message("Shared file download link generated successfully")
                 .build();
     }
+
+    @GetMapping("/documents/{id}/shares")
+    public ApiResponse<java.util.List<ShareResponse>> getDocumentShares(@PathVariable Long id) {
+        return ApiResponse.<java.util.List<ShareResponse>>builder()
+                .result(documentShareService.getSharesByDocumentId(id))
+                .message("Document share links retrieved successfully")
+                .build();
+    }
+
+    @DeleteMapping("/shares/{token}")
+    public ApiResponse<Void> revokeShareLink(@PathVariable String token) {
+        documentShareService.revokeShareLink(token);
+        return ApiResponse.<Void>builder()
+                .message("Share link revoked successfully")
+                .build();
+    }
 }

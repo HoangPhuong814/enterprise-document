@@ -22,10 +22,10 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableMethodSecurity
 public class SecurityConfig {
     private final String[] PUBLIC_GET_ENDPOINTS = {
-            "/test"
+            "/test", "/ws-notifications"
     };
     private final String[] PUBLIC_POST_ENDPOINTS = {
-            "/users/create", "/auth/login", "/auth/introspect", "/auth/refresh", "/auth/logout"
+            "/users/create", "/auth/login", "/auth/introspect", "/auth/refresh", "/auth/logout",
     };
 
     @Autowired
@@ -35,6 +35,7 @@ public class SecurityConfig {
         httpSecurity.cors(cors -> cors.configurationSource(corsConfigurationSource()));
 
         httpSecurity.authorizeHttpRequests(req -> req
+                .requestMatchers("/shares/**").permitAll()
                 .requestMatchers(HttpMethod.POST, PUBLIC_POST_ENDPOINTS).permitAll()
                 .requestMatchers(HttpMethod.GET, PUBLIC_GET_ENDPOINTS).permitAll()
 

@@ -19,7 +19,11 @@ public enum ErrorCode {
     PERMISSION_EXISTED(1005, "Permission already exists", HttpStatus.BAD_REQUEST),
     ROLE_EXISTED(1006, "Role already exists", HttpStatus.BAD_REQUEST),
     ROLE_NOT_EXISTED(1007, "Role not existed", HttpStatus.NOT_FOUND),
-    DOCUMENT_NOT_FOUND(1008, "Document not found", HttpStatus.NOT_FOUND);
+    DOCUMENT_NOT_FOUND(1008, "Document not found", HttpStatus.NOT_FOUND),
+    CATEGORY_NOT_FOUND(1009, "Category not found", HttpStatus.NOT_FOUND),
+    CATEGORY_EXISTED(1010, "Category already exists", HttpStatus.BAD_REQUEST),
+    SHARE_NOT_FOUND(1011, "Share link not found or expired", HttpStatus.NOT_FOUND),
+    SHARE_PASSCODE_INVALID(1012, "Invalid passcode for share link", HttpStatus.BAD_REQUEST);
 
     int code;
     String message;

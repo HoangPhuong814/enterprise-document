@@ -6,6 +6,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "documents")
 @Data
@@ -46,5 +48,5 @@ public class Document extends BaseEntity {
     boolean isDeleted = false;
 
     @Column(name = "deleted_at")
-    java.time.LocalDateTime deletedAt;
+    LocalDateTime deletedAt;
 }

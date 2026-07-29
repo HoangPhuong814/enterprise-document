@@ -88,7 +88,7 @@ public class S3StorageService {
                 .orElseThrow(()-> new AppException(ErrorCode.DOCUMENT_NOT_FOUND));
 
         String s3Url = document.getS3Url();
-        String s3Key = s3Url.substring(s3Url.lastIndexOf("/") + 1);
+        String s3Key = getS3KeyFromUrl(s3Url);
 
         Date expiration = new Date();
         long expTimeMillis = expiration.getTime();
@@ -177,7 +177,7 @@ public class S3StorageService {
                 .orElseThrow(() -> new AppException(ErrorCode.DOCUMENT_NOT_FOUND));
 
         String s3Url = document.getS3Url();
-        String s3Key = s3Url.substring(s3Url.lastIndexOf("/") + 1);
+        String s3Key = getS3KeyFromUrl(s3Url);
 
         try {
             amazonS3.deleteObject(bucketName, s3Key);
@@ -188,5 +188,16 @@ public class S3StorageService {
         }
 
         documentRepository.delete(document);
+    }
+
+    private String getS3KeyFromUrl(String s3Url) {
+        if (s3Url == null) return null;
+        try {
+            String encodedKey = s3Url.substring(s3Url.lastIndexOf("/") + 1);
+            return java.net.URLDecoder.decode(encodedKey, java.nio.charset.StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            log.error("Failed to decode S3 key from URL: " + s3Url, e);
+            return s3Url.substring(s3Url.lastIndexOf("/") + 1);
+        }
     }
 }

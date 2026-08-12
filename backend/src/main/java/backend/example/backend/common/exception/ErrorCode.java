@@ -23,7 +23,9 @@ public enum ErrorCode {
     CATEGORY_NOT_FOUND(1009, "Category not found", HttpStatus.NOT_FOUND),
     CATEGORY_EXISTED(1010, "Category already exists", HttpStatus.BAD_REQUEST),
     SHARE_NOT_FOUND(1011, "Share link not found or expired", HttpStatus.NOT_FOUND),
-    SHARE_PASSCODE_INVALID(1012, "Invalid passcode for share link", HttpStatus.BAD_REQUEST);
+    SHARE_PASSCODE_INVALID(1012, "Invalid passcode for share link", HttpStatus.BAD_REQUEST),
+    ANNOUNCEMENT_EXISTED(1013, "announcement existed", HttpStatus.BAD_REQUEST),
+    ANNOUNCEMENT_NOT_FOUND(1014, "announcement not found", HttpStatus.NOT_FOUND);
 
     int code;
     String message;

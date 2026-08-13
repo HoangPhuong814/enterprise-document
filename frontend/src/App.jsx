@@ -8,6 +8,7 @@ import Category from "./pages/Category";
 import Trash from "./pages/Trash";
 import ShareView from "./pages/ShareView";
 import Announcement from "./pages/Announcement";
+import Staff from "./pages/Staff";
 import {
   Shield,
   FileText,
@@ -21,6 +22,7 @@ import {
   Sun,
   Moon,
   Megaphone,
+  Users,
 } from "lucide-react";
 
 function AppContent() {
@@ -279,6 +281,35 @@ function AppContent() {
               <Megaphone size={18} />
               {t("sidebar.announcements")}
             </button>
+
+            {user?.email?.startsWith("admin") && (
+              <button
+                onClick={() => setCurrentTab("staff")}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "12px",
+                  width: "100%",
+                  padding: "10px 12px",
+                  borderRadius: "8px",
+                  background:
+                    currentTab === "staff" ? "var(--bg-tertiary)" : "transparent",
+                  color:
+                    currentTab === "staff"
+                      ? "var(--text-primary)"
+                      : "var(--text-secondary)",
+                  border: "none",
+                  cursor: "pointer",
+                  fontFamily: "inherit",
+                  fontSize: "14px",
+                  fontWeight: 500,
+                  textAlign: "left",
+                }}
+              >
+                <Users size={18} />
+                {t("sidebar.staff")}
+              </button>
+            )}
           </nav>
         </div>
 
@@ -454,7 +485,9 @@ function AppContent() {
                   ? t("sidebar.categories")
                   : currentTab === "trash"
                     ? t("sidebar.trash")
-                    : t("sidebar.announcements")}
+                    : currentTab === "announcements"
+                      ? t("sidebar.announcements")
+                      : t("sidebar.staff")}
             </span>
           </div>
 
@@ -494,6 +527,7 @@ function AppContent() {
           {currentTab === "categories" && <Category />}
           {currentTab === "trash" && <Trash />}
           {currentTab === "announcements" && <Announcement />}
+          {currentTab === "staff" && user?.email?.startsWith("admin") && <Staff />}
         </div>
       </main>
     </div>

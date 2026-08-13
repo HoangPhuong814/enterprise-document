@@ -7,6 +7,7 @@ import Dashboard from "./pages/Dashboard";
 import Category from "./pages/Category";
 import Trash from "./pages/Trash";
 import ShareView from "./pages/ShareView";
+import Announcement from "./pages/Announcement";
 import {
   Shield,
   FileText,
@@ -19,6 +20,7 @@ import {
   Info,
   Sun,
   Moon,
+  Megaphone,
 } from "lucide-react";
 
 function AppContent() {
@@ -250,6 +252,33 @@ function AppContent() {
               <Trash2 size={18} />
               {t("sidebar.trash")}
             </button>
+
+            <button
+              onClick={() => setCurrentTab("announcements")}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+                width: "100%",
+                padding: "10px 12px",
+                borderRadius: "8px",
+                background:
+                  currentTab === "announcements" ? "var(--bg-tertiary)" : "transparent",
+                color:
+                  currentTab === "announcements"
+                    ? "var(--text-primary)"
+                    : "var(--text-secondary)",
+                border: "none",
+                cursor: "pointer",
+                fontFamily: "inherit",
+                fontSize: "14px",
+                fontWeight: 500,
+                textAlign: "left",
+              }}
+            >
+              <Megaphone size={18} />
+              {t("sidebar.announcements")}
+            </button>
           </nav>
         </div>
 
@@ -423,7 +452,9 @@ function AppContent() {
                 ? t("sidebar.documents")
                 : currentTab === "categories"
                   ? t("sidebar.categories")
-                  : t("sidebar.trash")}
+                  : currentTab === "trash"
+                    ? t("sidebar.trash")
+                    : t("sidebar.announcements")}
             </span>
           </div>
 
@@ -462,6 +493,7 @@ function AppContent() {
           {currentTab === "documents" && <Dashboard />}
           {currentTab === "categories" && <Category />}
           {currentTab === "trash" && <Trash />}
+          {currentTab === "announcements" && <Announcement />}
         </div>
       </main>
     </div>

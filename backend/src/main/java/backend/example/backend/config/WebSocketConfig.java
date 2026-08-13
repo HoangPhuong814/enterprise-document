@@ -12,10 +12,13 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 public class WebSocketConfig implements WebSocketConfigurer {
 
     private final NotificationWebSocketHandler notificationWebSocketHandler;
+    private final ChatWebSocketHandler chatWebSocketHandler;
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         registry.addHandler(notificationWebSocketHandler, "/ws-notifications")
-                .setAllowedOrigins("*"); // Cho phép kết nối từ mọi nguồn (bao gồm localhost:5173 của React)
+                .setAllowedOrigins("*");
+        registry.addHandler(chatWebSocketHandler, "/ws-chat")
+                .setAllowedOrigins("*");
     }
 }

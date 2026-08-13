@@ -40,7 +40,8 @@ public class WebSocketSessionManager {
             }
         }
         else {
-            System.out.println("[WebSocket] User " + email + " currently offline or session closed. Available keys: " + userSessions.keySet());
+            System.out.println("[WebSocket] User " + email +
+                    " currently offline or session closed. Available keys: " + userSessions.keySet());
         }
     }
 

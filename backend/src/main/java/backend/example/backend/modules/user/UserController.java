@@ -1,6 +1,7 @@
 package backend.example.backend.modules.user;
 
 import backend.example.backend.common.response.ApiResponse;
+import backend.example.backend.common.response.PageResponse;
 import backend.example.backend.modules.user.dto.UserCreationRequest;
 import backend.example.backend.modules.user.dto.UserResponse;
 import backend.example.backend.modules.user.dto.UserUpdateRequest;
@@ -28,9 +29,11 @@ public class UserController {
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    ApiResponse<List<UserResponse>> getAllUsers() {
-        return ApiResponse.<List<UserResponse>>builder()
-                .result(userService.getAllUsers())
+    ApiResponse<PageResponse<UserResponse>> getAllUsers
+            (@RequestParam(value = "page", defaultValue = "1") int page,
+             @RequestParam(value = "size", defaultValue = "10") int size) {
+        return ApiResponse.<PageResponse<UserResponse>>builder()
+                .result(userService.getAllUsers(page, size))
                 .build();
     }
 

@@ -2,12 +2,16 @@ package backend.example.backend.modules.user;
 
 import backend.example.backend.common.exception.AppException;
 import backend.example.backend.common.exception.ErrorCode;
+import backend.example.backend.common.response.PageResponse;
 import backend.example.backend.modules.user.dto.UserCreationRequest;
 import backend.example.backend.modules.user.dto.UserResponse;
 import backend.example.backend.modules.user.dto.UserUpdateRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -53,8 +57,18 @@ public class UserService {
         return userMapper.toUserResponse(user);
     }
 
-    public List<UserResponse> getAllUsers() {
-        return userMapper.toListUserResponse(userRepository.findAll());
+    public PageResponse<UserResponse> getAllUsers(int page, int size) {
+        Pageable pageable = PageRequest.of(page - 1, size);
+        Page<User> pageData = userRepository.findAll(pageable);
+        var userResponses = pageData.getContent().stream()
+                .map(userMapper::toUserResponse)
+                .toList();
+        return PageResponse.<UserResponse>builder()
+                .currentPage(page)
+                .totalPages(pageData.getTotalPages())
+                .totalElements(pageData.getTotalElements())
+                .data(userResponses)
+                .build();
     }
 
     public UserResponse updateUser(String id, UserUpdateRequest request) {

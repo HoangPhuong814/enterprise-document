@@ -8,20 +8,47 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const fetchMyInfo = async (jwtToken) => {
+    try {
+      const response = await api.get('/users/my-info');
+      const userProfile = response.result;
+      localStorage.setItem('user', JSON.stringify(userProfile));
+      setUser(userProfile);
+      return userProfile;
+    } catch (err) {
+      console.error("Failed to fetch user profile", err);
+      throw err;
+    }
+  };
+
   useEffect(() => {
     const savedToken = localStorage.getItem('token');
     const savedUser = localStorage.getItem('user');
 
-    if (savedToken && savedUser) {
-      setToken(savedToken);
-      try {
-        setUser(JSON.parse(savedUser));
-      } catch (e) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+    const initAuth = async () => {
+      if (savedToken) {
+        setToken(savedToken);
+        if (savedUser) {
+          try {
+            setUser(JSON.parse(savedUser));
+          } catch (e) {
+            // ignore
+          }
+        }
+        try {
+          await fetchMyInfo(savedToken);
+        } catch (e) {
+          // Token is likely invalid or expired
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          setUser(null);
+          setToken(null);
+        }
       }
-    }
-    setLoading(false);
+      setLoading(false);
+    };
+
+    initAuth();
 
     // Lắng nghe sự kiện logout từ API client
     const handleLogoutEvent = () => {
@@ -41,12 +68,13 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('token', jwtToken);
     setToken(jwtToken);
 
-    // Lấy thông tin user (ở dự án này, sau đăng nhập, ta có thể giải mã token hoặc lấy qua API)
-    // Để đơn giản và tối ưu, ta lưu email & role của user vào localStorage từ response
-    // Giả lập lưu email thành name/role (trong thực tế có API get info hoặc decode JWT)
-    const userPayload = { email };
-    localStorage.setItem('user', JSON.stringify(userPayload));
-    setUser(userPayload);
+    try {
+      await fetchMyInfo(jwtToken);
+    } catch (e) {
+      const userPayload = { email };
+      localStorage.setItem('user', JSON.stringify(userPayload));
+      setUser(userPayload);
+    }
 
     return response;
   };

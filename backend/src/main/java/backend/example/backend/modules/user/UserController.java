@@ -2,6 +2,7 @@ package backend.example.backend.modules.user;
 
 import backend.example.backend.common.response.ApiResponse;
 import backend.example.backend.common.response.PageResponse;
+import backend.example.backend.modules.user.dto.RoleResponse;
 import backend.example.backend.modules.user.dto.UserCreationRequest;
 import backend.example.backend.modules.user.dto.UserResponse;
 import backend.example.backend.modules.user.dto.UserUpdateRequest;
@@ -48,6 +49,20 @@ public class UserController {
     ApiResponse<UserResponse> getMyInfo() {
         return ApiResponse.<UserResponse>builder()
                 .result(userService.getMyInfo())
+                .build();
+    }
+
+    @GetMapping("/chat-list")
+    ApiResponse<List<UserResponse>> getChatList() {
+        return ApiResponse.<List<UserResponse>>builder()
+                .result(userService.getChatList())
+                .build();
+    }
+
+    @GetMapping("/departments")
+    ApiResponse<List<RoleResponse>> getDepartments() {
+        return ApiResponse.<List<RoleResponse>>builder()
+                .result(userService.getDepartments())
                 .build();
     }
 

@@ -3,6 +3,7 @@ package backend.example.backend.modules.user;
 import backend.example.backend.common.exception.AppException;
 import backend.example.backend.common.exception.ErrorCode;
 import backend.example.backend.common.response.PageResponse;
+import backend.example.backend.modules.user.dto.RoleResponse;
 import backend.example.backend.modules.user.dto.UserCreationRequest;
 import backend.example.backend.modules.user.dto.UserResponse;
 import backend.example.backend.modules.user.dto.UserUpdateRequest;
@@ -27,6 +28,7 @@ public class UserService {
     UserRepository userRepository;
     RoleRepository roleRepository;
     UserMapper userMapper;
+    RoleMapper roleMapper;
     PasswordEncoder passwordEncoder;
 
     public UserResponse createUser(UserCreationRequest request) {
@@ -105,5 +107,17 @@ public class UserService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         return userMapper.toUserResponse(user);
+    }
+
+    public List<UserResponse> getChatList() {
+        return userRepository.findAll().stream()
+                .map(userMapper::toUserResponse)
+                .toList();
+    }
+
+    public List<RoleResponse> getDepartments() {
+        return roleRepository.findAll().stream()
+                .map(roleMapper::toRoleResponse)
+                .toList();
     }
 }

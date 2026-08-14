@@ -26,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.util.Date;
 import java.util.UUID;
 
@@ -190,11 +191,16 @@ public class S3StorageService {
         documentRepository.delete(document);
     }
 
+    public Document getDocumentById(Long id) {
+        return documentRepository.findByIdAndIsDeletedFalse(id)
+                .orElseThrow(() -> new AppException(ErrorCode.DOCUMENT_NOT_FOUND));
+    }
+
     private String getS3KeyFromUrl(String s3Url) {
         if (s3Url == null) return null;
         try {
             String encodedKey = s3Url.substring(s3Url.lastIndexOf("/") + 1);
-            return java.net.URLDecoder.decode(encodedKey, java.nio.charset.StandardCharsets.UTF_8);
+            return URLDecoder.decode(encodedKey, java.nio.charset.StandardCharsets.UTF_8);
         } catch (Exception e) {
             log.error("Failed to decode S3 key from URL: " + s3Url, e);
             return s3Url.substring(s3Url.lastIndexOf("/") + 1);

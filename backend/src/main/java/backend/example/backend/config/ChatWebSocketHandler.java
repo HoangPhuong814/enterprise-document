@@ -3,7 +3,7 @@ package backend.example.backend.config;
 import backend.example.backend.modules.chat.ChatMessage;
 import backend.example.backend.modules.chat.ChatMessageRepository;
 import backend.example.backend.modules.user.UserRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -49,7 +49,17 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         payload.setSenderEmail(senderEmail);
         // 1. Lưu tin nhắn vào Database
         ChatMessage savedMessage = chatMessageRepository.save(payload);
-        String jsonResponse = objectMapper.writeValueAsString(savedMessage);
+        
+        java.util.Map<String, Object> messageMap = new java.util.HashMap<>();
+        messageMap.put("id", savedMessage.getId());
+        messageMap.put("senderEmail", savedMessage.getSenderEmail());
+        messageMap.put("recipientEmail", savedMessage.getRecipientEmail());
+        messageMap.put("departmentRole", savedMessage.getDepartmentRole());
+        messageMap.put("content", savedMessage.getContent());
+        messageMap.put("documentId", savedMessage.getDocumentId());
+        messageMap.put("createdAt", savedMessage.getCreatedAt() != null ? savedMessage.getCreatedAt().toString() : null);
+
+        String jsonResponse = objectMapper.writeValueAsString(messageMap);
         TextMessage outboundMessage = new TextMessage(jsonResponse);
         // 2. Định tuyến gửi tin
         if (payload.getRecipientEmail() != null) {

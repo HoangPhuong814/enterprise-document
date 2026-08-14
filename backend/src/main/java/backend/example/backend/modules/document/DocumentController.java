@@ -42,6 +42,15 @@ public class DocumentController {
                 .build();
     }
 
+    @GetMapping("/{id}")
+    public ApiResponse<DocumentResponse> getDocumentById(@PathVariable Long id) {
+        Document document = s3StorageService.getDocumentById(id);
+        return ApiResponse.<DocumentResponse>builder()
+                .result(documentMapper.toDocumentResponse(document))
+                .message("Get document details successfully")
+                .build();
+    }
+
     @GetMapping
     public ApiResponse<PageResponse<DocumentResponse>> getDocuments(
             @RequestParam(value = "page", defaultValue = "1", required = false) int page,

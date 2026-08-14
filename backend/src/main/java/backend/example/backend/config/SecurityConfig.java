@@ -22,7 +22,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableMethodSecurity
 public class SecurityConfig {
     private final String[] PUBLIC_GET_ENDPOINTS = {
-            "/test", "/ws-notifications"
+            "/test", "/ws-notifications", "/ws-chat"
     };
     private final String[] PUBLIC_POST_ENDPOINTS = {
             "/users/create", "/auth/login", "/auth/introspect", "/auth/refresh", "/auth/logout",

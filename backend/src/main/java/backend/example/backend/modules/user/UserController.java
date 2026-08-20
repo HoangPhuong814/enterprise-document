@@ -28,6 +28,13 @@ public class UserController {
                 .build();
     }
 
+    @PostMapping("/create-employee")
+    ApiResponse<UserResponse> createEmployee(@RequestBody UserCreationRequest request) {
+        return ApiResponse.<UserResponse>builder()
+                .result(userService.createEmployee(request))
+                .build();
+    }
+
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     ApiResponse<PageResponse<UserResponse>> getAllUsers

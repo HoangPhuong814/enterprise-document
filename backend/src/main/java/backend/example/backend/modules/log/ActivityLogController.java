@@ -27,12 +27,14 @@ public class ActivityLogController {
             @RequestParam(value = "search", required = false) String search,
             @RequestParam(value = "action", required = false) String action
     ) {
-        Pageable pageable = PageRequest.of(page - 1, size, Sort.by(Sort.Direction.DESC, "timestamp"));
+        Pageable pageable = PageRequest.of(page - 1, size,
+                Sort.by(Sort.Direction.DESC, "timestamp"));
         
         Page<ActivityLog> logPage;
         if (action != null && !action.isEmpty() && !"ALL".equalsIgnoreCase(action)) {
             if (search != null && !search.isEmpty()) {
-                logPage = activityLogRepository.findByActionAndUserEmailContainingIgnoreCaseOrActionAndDocumentNameContainingIgnoreCase(
+                logPage = activityLogRepository
+                        .findByActionAndUserEmailContainingIgnoreCaseOrActionAndDocumentNameContainingIgnoreCase(
                         action, search, action, search, pageable
                 );
             } else {

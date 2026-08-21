@@ -43,6 +43,10 @@ public class Document extends BaseEntity {
     @JoinColumn(name = "category_id")
     Category category;
 
+    @Column(name = "access_role", length = 50)
+    @Builder.Default
+    String accessRole = "PUBLIC";
+
     @Column(name = "is_deleted", nullable = false, columnDefinition = "boolean default false")
     @Builder.Default
     boolean isDeleted = false;

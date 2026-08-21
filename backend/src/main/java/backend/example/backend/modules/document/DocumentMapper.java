@@ -5,6 +5,8 @@ import backend.example.backend.modules.user.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring")
 public interface DocumentMapper {
     DocumentResponse toDocumentResponse(Document document);
@@ -13,5 +15,5 @@ public interface DocumentMapper {
     DocumentResponse.UploaderInfo toUploaderInfo(User user);
 
     DocumentResponse.CategoryInfo toCategoryInfo(Category category);
-    java.util.List<DocumentResponse> toDocumentResponseList(java.util.List<Document> documents);
+    List<DocumentResponse> toDocumentResponseList(java.util.List<Document> documents);
 }

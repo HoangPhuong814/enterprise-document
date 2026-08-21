@@ -1,4 +1,4 @@
-package backend.example.backend.modules.document.share;
+package backend.example.backend.modules.document.dto;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;

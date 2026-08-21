@@ -20,6 +20,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,6 +29,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.UUID;
 
@@ -46,7 +50,7 @@ public class S3StorageService {
     String bucketName;
 
     @Transactional
-    public Document uploadDocument(MultipartFile file, String uploaderEmail, Long categoryId) {
+    public Document uploadDocument(MultipartFile file, String uploaderEmail, Long categoryId, String accessRole) {
         User user = userRepository.findByEmail(uploaderEmail)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
@@ -74,6 +78,7 @@ public class S3StorageService {
                     .s3Url(fileUrl)
                     .uploader(user)
                     .category(category)
+                    .accessRole(accessRole != null && !accessRole.isEmpty() ? accessRole : "PUBLIC")
                     .build();
             return documentRepository.save(document);
 
@@ -112,7 +117,26 @@ public class S3StorageService {
                 : Sort.by(sortBy).descending();
 
         Pageable pageable = PageRequest.of(page - 1, size, sort);
-        Page<Document> pageData = documentRepository.findAllByIsDeletedFalse(pageable);
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String currentUserEmail = (auth != null) ? auth.getName() : "Anonymous";
+
+        java.util.Set<String> authorities = new java.util.HashSet<>();
+        if (auth != null) {
+            auth.getAuthorities().forEach(authority -> {
+                authorities.add(authority.getAuthority());
+            });
+        }
+
+        boolean isAdmin = authorities.contains("ROLE_admin") || authorities.contains("admin");
+
+        Page<Document> pageData;
+        if (isAdmin) {
+            pageData = documentRepository.findAllByIsDeletedFalse(pageable);
+        } else {
+            Collection<String> rolesToPass = authorities.isEmpty() ? Collections.singletonList("NONE") : authorities;
+            pageData = documentRepository.findAccessibleDocuments(currentUserEmail, rolesToPass, pageable);
+        }
 
         var documentResponses = pageData.getContent().stream()
                 .map(documentMapper::toDocumentResponse)
@@ -194,6 +218,26 @@ public class S3StorageService {
     public Document getDocumentById(Long id) {
         return documentRepository.findByIdAndIsDeletedFalse(id)
                 .orElseThrow(() -> new AppException(ErrorCode.DOCUMENT_NOT_FOUND));
+    }
+
+    @Transactional
+    public Document updateDocument(Long id, Long categoryId, String accessRole) {
+        Document document = documentRepository.findByIdAndIsDeletedFalse(id)
+                .orElseThrow(() -> new AppException(ErrorCode.DOCUMENT_NOT_FOUND));
+
+        if (categoryId != null) {
+            Category category = categoryRepository.findById(categoryId)
+                    .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
+            document.setCategory(category);
+        } else {
+            document.setCategory(null);
+        }
+
+        if (accessRole != null) {
+            document.setAccessRole(accessRole);
+        }
+
+        return documentRepository.save(document);
     }
 
     private String getS3KeyFromUrl(String s3Url) {

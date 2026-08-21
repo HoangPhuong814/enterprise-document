@@ -6,6 +6,8 @@ import backend.example.backend.config.WebSocketSessionManager;
 import backend.example.backend.modules.document.Document;
 import backend.example.backend.modules.document.DocumentRepository;
 import backend.example.backend.modules.document.S3StorageService;
+import backend.example.backend.modules.document.dto.ShareRequest;
+import backend.example.backend.modules.document.dto.ShareResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -14,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -97,7 +100,7 @@ public class DocumentShareService {
     }
 
     @Transactional(readOnly = true)
-    public java.util.List<ShareResponse> getSharesByDocumentId(Long documentId) {
+    public List<ShareResponse> getSharesByDocumentId(Long documentId) {
         if (!documentRepository.existsById(documentId)) {
             throw new AppException(ErrorCode.DOCUMENT_NOT_FOUND);
         }

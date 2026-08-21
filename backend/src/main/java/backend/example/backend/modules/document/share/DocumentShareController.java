@@ -1,6 +1,8 @@
 package backend.example.backend.modules.document.share;
 
 import backend.example.backend.common.response.ApiResponse;
+import backend.example.backend.modules.document.dto.ShareRequest;
+import backend.example.backend.modules.document.dto.ShareResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;

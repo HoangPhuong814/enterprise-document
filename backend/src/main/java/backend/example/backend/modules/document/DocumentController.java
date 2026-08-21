@@ -20,10 +20,11 @@ public class DocumentController {
     @PostMapping("/upload")
     public ApiResponse<DocumentResponse> uploadFile(@RequestParam("file") MultipartFile file,
                                                      @RequestParam(value = "categoryId", required = false) Long categoryId,
+                                                     @RequestParam(value = "accessRole", required = false) String accessRole,
                                                      Authentication authentication)
     {
         String email = authentication.getName();
-        Document document = s3StorageService.uploadDocument(file, email, categoryId);
+        Document document = s3StorageService.uploadDocument(file, email, categoryId, accessRole);
 
         return ApiResponse.<DocumentResponse>builder()
                 .result(documentMapper.toDocumentResponse(document))
@@ -106,6 +107,19 @@ public class DocumentController {
         s3StorageService.hardDeleteDocument(id);
         return ApiResponse.<Void>builder()
                 .message("Permanent delete document successfully")
+                .build();
+    }
+
+    @PutMapping("/{id}")
+    public ApiResponse<DocumentResponse> updateDocument(
+            @PathVariable Long id,
+            @RequestParam(value = "categoryId", required = false) Long categoryId,
+            @RequestParam(value = "accessRole", required = false) String accessRole
+    ) {
+        Document document = s3StorageService.updateDocument(id, categoryId, accessRole);
+        return ApiResponse.<DocumentResponse>builder()
+                .result(documentMapper.toDocumentResponse(document))
+                .message("Update document details successfully")
                 .build();
     }
 }

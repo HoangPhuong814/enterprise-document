@@ -16,6 +16,8 @@ public class DocumentResponse {
     String s3Url;
     UploaderInfo uploader;
     CategoryInfo category;
+    String accessRole;
+    java.time.LocalDateTime createdAt;
 
     @Data
     @Builder

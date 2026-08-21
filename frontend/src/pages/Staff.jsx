@@ -13,6 +13,7 @@ export default function Staff() {
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [allRoles, setAllRoles] = useState([]);
 
   // Modal states
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -40,9 +41,22 @@ export default function Staff() {
     }
   };
 
+  const fetchAllRoles = async () => {
+    try {
+      const response = await api.get('/roles');
+      setAllRoles(response.result || []);
+    } catch (err) {
+      console.error("Failed to load roles", err);
+    }
+  };
+
   useEffect(() => {
     fetchUsers();
   }, [page]);
+
+  useEffect(() => {
+    fetchAllRoles();
+  }, []);
 
   const openCreateModal = () => {
     setName('');
@@ -398,31 +412,37 @@ export default function Staff() {
                 <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '8px' }}>
                   {t('staff.colRoles')}
                 </label>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', padding: '8px 12px', backgroundColor: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: '8px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <input
-                      type="checkbox"
-                      id="roleAdmin"
-                      checked={selectedRoles.includes('ADMIN')}
-                      onChange={() => handleRoleToggle('ADMIN')}
-                      style={{ width: 'auto', cursor: 'pointer' }}
-                    />
-                    <label htmlFor="roleAdmin" style={{ fontSize: '13px', color: 'var(--text-primary)', cursor: 'pointer', userSelect: 'none' }}>
-                      {t('staff.roleAdmin')}
-                    </label>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <input
-                      type="checkbox"
-                      id="roleUser"
-                      checked={selectedRoles.includes('USER')}
-                      onChange={() => handleRoleToggle('USER')}
-                      style={{ width: 'auto', cursor: 'pointer' }}
-                    />
-                    <label htmlFor="roleUser" style={{ fontSize: '13px', color: 'var(--text-primary)', cursor: 'pointer', userSelect: 'none' }}>
-                      {t('staff.roleUser')}
-                    </label>
-                  </div>
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '10px',
+                  padding: '8px 12px',
+                  backgroundColor: 'var(--bg-primary)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: '8px',
+                  maxHeight: '140px',
+                  overflowY: 'auto'
+                }}>
+                  {allRoles.length === 0 ? (
+                    <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                      {language === 'en' ? 'No roles available.' : 'Không có vai trò khả dụng.'}
+                    </div>
+                  ) : (
+                    allRoles.map((role) => (
+                      <div key={role.id} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <input
+                          type="checkbox"
+                          id={`staffRole-${role.name}`}
+                          checked={selectedRoles.includes(role.name)}
+                          onChange={() => handleRoleToggle(role.name)}
+                          style={{ width: 'auto', cursor: 'pointer' }}
+                        />
+                        <label htmlFor={`staffRole-${role.name}`} style={{ fontSize: '13px', color: 'var(--text-primary)', cursor: 'pointer', userSelect: 'none' }} title={role.description}>
+                          {role.name}
+                        </label>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
 

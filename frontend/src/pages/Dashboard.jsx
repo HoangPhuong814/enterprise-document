@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
 import {
   FileText,
   FileImage,
@@ -24,6 +25,7 @@ import {
   Loader,
   Database,
   Files,
+  Edit,
 } from 'lucide-react';
 import { toast } from '../services/toast';
 import { useConfirm } from '../context/ConfirmContext';
@@ -31,6 +33,15 @@ import { useConfirm } from '../context/ConfirmContext';
 export default function Dashboard() {
   const { t, language } = useLanguage();
   const { confirm } = useConfirm();
+  const { user } = useAuth();
+
+  const [viewTab, setViewTab] = useState('all'); // 'all' or 'mine'
+  const [departments, setDepartments] = useState([]);
+  const [uploadAccessRole, setUploadAccessRole] = useState('PUBLIC');
+
+  const [editingDoc, setEditingDoc] = useState(null);
+  const [editCategory, setEditCategory] = useState('');
+  const [editAccessRole, setEditAccessRole] = useState('PUBLIC');
 
   const [documents, setDocuments] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -46,6 +57,7 @@ export default function Dashboard() {
 
   const [file, setFile] = useState(null);
   const [uploadCategory, setUploadCategory] = useState('');
+  const [showUploadModal, setShowUploadModal] = useState(false);
 
   const [sharingDoc, setSharingDoc] = useState(null);
   const [passcode, setPasscode] = useState('');
@@ -163,6 +175,19 @@ export default function Dashboard() {
     }
   };
 
+  const fetchDepartments = async () => {
+    try {
+      const response = await api.get('/users/departments');
+      setDepartments(response.result || []);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    fetchDepartments();
+  }, []);
+
   useEffect(() => {
     fetchDocuments();
     fetchCategories();
@@ -176,16 +201,37 @@ export default function Dashboard() {
     const formData = new FormData();
     formData.append('file', file);
     if (uploadCategory) formData.append('categoryId', uploadCategory);
+    if (uploadAccessRole) formData.append('accessRole', uploadAccessRole);
     try {
       await api.post('/documents/upload', formData);
-      toast.success('File uploaded successfully!');
+      toast.success(language === 'en' ? 'File uploaded successfully!' : 'Tải lên tài liệu thành công!');
       setFile(null);
       setUploadCategory('');
+      setUploadAccessRole('PUBLIC');
+      setShowUploadModal(false);
       fetchDocuments();
     } catch (err) {
       toast.error(err.message || 'Upload failed');
     } finally {
       setUploading(false);
+    }
+  };
+
+  const handleEditClick = (doc) => {
+    setEditingDoc(doc);
+    setEditCategory(doc.category ? doc.category.id.toString() : '');
+    setEditAccessRole(doc.accessRole || 'PUBLIC');
+  };
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await api.put(`/documents/${editingDoc.id}?categoryId=${editCategory || ''}&accessRole=${editAccessRole}`);
+      toast.success(language === 'en' ? 'Document updated successfully!' : 'Cập nhật tài liệu thành công!');
+      setEditingDoc(null);
+      fetchDocuments();
+    } catch (err) {
+      toast.error(err.message || 'Update failed');
     }
   };
 
@@ -297,6 +343,21 @@ export default function Dashboard() {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
+  const formatDate = (dateStr) => {
+    if (!dateStr) return '—';
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) {
+        const cleanStr = dateStr.replace(' ', 'T');
+        const fallbackD = new Date(cleanStr);
+        return isNaN(fallbackD.getTime()) ? dateStr : fallbackD.toLocaleDateString();
+      }
+      return d.toLocaleDateString();
+    } catch (e) {
+      return dateStr;
+    }
+  };
+
   const toggleSort = (field) => {
     if (sortBy === field) {
       setSortDir(sortDir === 'asc' ? 'desc' : 'asc');
@@ -309,7 +370,8 @@ export default function Dashboard() {
   const filteredDocuments = documents.filter((doc) => {
     const matchesSearch = doc.fileName.toLowerCase().includes(search.toLowerCase());
     const matchesCategory = selectedCategory ? doc.category?.id === parseInt(selectedCategory) : true;
-    return matchesSearch && matchesCategory;
+    const matchesTab = viewTab === 'mine' ? doc.uploader?.email === user?.email : true;
+    return matchesSearch && matchesCategory && matchesTab;
   });
 
   const pageStorageBytes = documents.reduce((sum, doc) => sum + (doc.fileSize || 0), 0);
@@ -339,19 +401,25 @@ export default function Dashboard() {
           {t("dashboard.desc")}
         </p>
       </div>
+      <button
+        className="btn btn-primary"
+        onClick={() => {
+          setFile(null);
+          setUploadCategory("");
+          setUploadAccessRole("PUBLIC");
+          setShowUploadModal(true);
+        }}
+      >
+        <Upload size={16} />
+        {t("dashboard.uploadBtn")}
+      </button>
     </div>
 
     {/* Stats Cards */}
     <div className="stats-container">
       <div className="stat-card">
-        <div
-          className="stat-icon-wrapper"
-          style={{
-            backgroundColor: "rgba(94, 106, 210, 0.1)",
-            color: "var(--accent)",
-          }}
-        >
-          <Files size={22} />
+        <div className="stat-icon-wrapper">
+          <Files size={20} />
         </div>
         <div className="stat-info">
           <span className="stat-value">{totalElements}</span>
@@ -363,11 +431,11 @@ export default function Dashboard() {
         <div
           className="stat-icon-wrapper"
           style={{
-            backgroundColor: "rgba(16, 185, 129, 0.1)",
+            backgroundColor: "var(--success-light)",
             color: "var(--success)",
           }}
         >
-          <Database size={22} />
+          <Database size={20} />
         </div>
         <div className="stat-info">
           <span className="stat-value">{formatSize(pageStorageBytes)}</span>
@@ -388,11 +456,11 @@ export default function Dashboard() {
         <div
           className="stat-icon-wrapper"
           style={{
-            backgroundColor: "rgba(234, 179, 8, 0.1)",
-            color: "#eab308",
+            backgroundColor: "var(--warning-light)",
+            color: "var(--warning)",
           }}
         >
-          <Folder size={22} />
+          <Folder size={20} />
         </div>
         <div className="stat-info">
           <span className="stat-value">{categories.length}</span>
@@ -401,30 +469,43 @@ export default function Dashboard() {
       </div>
     </div>
 
-    {/* Upload & Stats Row */}
-    <div
-      style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "24px" }}
-    >
       {/* Document list & Filters */}
       <div
         className="card"
-        style={{ display: "flex", flexDirection: "column", gap: "20px" }}
+        style={{ display: "flex", flexDirection: "column", gap: "20px", width: "100%" }}
       >
+        {/* View Switcher Tabs (Segmented Controls) */}
+        <div className="tab-container">
+          <button
+            onClick={() => setViewTab("all")}
+            className={`tab-btn ${viewTab === "all" ? "active" : ""}`}
+          >
+            {language === "en" ? "All Documents" : "Tất cả tài liệu"}
+          </button>
+          <button
+            onClick={() => setViewTab("mine")}
+            className={`tab-btn ${viewTab === "mine" ? "active" : ""}`}
+          >
+            {language === "en" ? "My Documents" : "Tài liệu của tôi"}
+          </button>
+        </div>
+
         {/* Controls Header */}
         <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
           <div style={{ position: "relative", flex: 1 }}>
             <Search
               size={16}
               color="var(--text-muted)"
-              style={{ position: "absolute", left: "12px", top: "12px" }}
+              style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)" }}
             />
             <input
               type="text"
               placeholder={t("dashboard.searchPlaceholder")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              style={{ paddingLeft: "38px" }}
+              style={{ paddingLeft: "38px", paddingRight: "48px" }}
             />
+            <span className="search-shortcut">⌘K</span>
           </div>
 
           <div
@@ -568,28 +649,29 @@ export default function Dashboard() {
                 <tr>
                   <th
                     onClick={() => toggleSort("fileName")}
-                    style={{ cursor: "pointer" }}
+                    style={{ cursor: "pointer", width: "30%", minWidth: "220px" }}
                   >
                     {t("dashboard.colName")}{" "}
                     <ArrowUpDown size={12} style={{ marginLeft: "4px" }} />
                   </th>
-                  <th>{t("category.title")}</th>
+                  <th style={{ minWidth: "120px" }}>{t("category.title")}</th>
+                  <th style={{ minWidth: "100px" }}>{language === "en" ? "Visibility" : "Phạm vi"}</th>
                   <th
                     onClick={() => toggleSort("fileSize")}
-                    style={{ cursor: "pointer" }}
+                    style={{ cursor: "pointer", minWidth: "90px" }}
                   >
                     {t("dashboard.colSize")}{" "}
                     <ArrowUpDown size={12} style={{ marginLeft: "4px" }} />
                   </th>
-                  <th>{t("dashboard.colUploader")}</th>
+                  <th style={{ minWidth: "120px" }}>{t("dashboard.colUploader")}</th>
                   <th
                     onClick={() => toggleSort("createdAt")}
-                    style={{ cursor: "pointer" }}
+                    style={{ cursor: "pointer", minWidth: "100px" }}
                   >
                     {t("dashboard.colCreated")}{" "}
                     <ArrowUpDown size={12} style={{ marginLeft: "4px" }} />
                   </th>
-                  <th style={{ textAlign: "right" }}>
+                  <th style={{ textAlign: "right", minWidth: "150px" }}>
                     {t("dashboard.colActions")}
                   </th>
                 </tr>
@@ -606,7 +688,15 @@ export default function Dashboard() {
                         }}
                       >
                         {getFileIcon(doc.fileName)}
-                        <span style={{ fontWeight: 500 }}>{doc.fileName}</span>
+                        <span
+                          style={{
+                            fontWeight: 500,
+                            wordBreak: "break-all",
+                            display: "inline-block",
+                          }}
+                        >
+                          {doc.fileName}
+                        </span>
                       </div>
                     </td>
                     <td>
@@ -625,9 +715,19 @@ export default function Dashboard() {
                         </span>
                       )}
                     </td>
+                    <td>
+                      <span
+                        className={`badge ${doc.accessRole === "PUBLIC" || !doc.accessRole ? "badge-success" : "badge-accent"}`}
+                        style={{ textTransform: "uppercase", fontSize: "11px" }}
+                      >
+                        {doc.accessRole === "PUBLIC" || !doc.accessRole
+                          ? (language === "en" ? "Public" : "Công khai")
+                          : doc.accessRole.replace("ROLE_", "").toUpperCase()}
+                      </span>
+                    </td>
                     <td>{formatSize(doc.fileSize)}</td>
                     <td>{doc.uploader?.fullName || "System"}</td>
-                    <td>{new Date(doc.createdAt).toLocaleDateString()}</td>
+                    <td>{formatDate(doc.createdAt)}</td>
                     <td>
                       <div
                         style={{
@@ -644,6 +744,16 @@ export default function Dashboard() {
                         >
                           <Eye size={16} />
                         </button>
+                        {(user?.roles?.some(r => r.name === "ADMIN") || user?.email?.startsWith("admin") || doc.uploader?.email === user?.email) && (
+                          <button
+                            className="btn btn-text"
+                            onClick={() => handleEditClick(doc)}
+                            title={language === 'en' ? 'Edit Properties' : 'Chỉnh sửa'}
+                            style={{ padding: "6px", color: "var(--accent)" }}
+                          >
+                            <Edit size={16} />
+                          </button>
+                        )}
                         <button
                           className="btn btn-text"
                           onClick={() => handleDownload(doc.id)}
@@ -724,118 +834,143 @@ export default function Dashboard() {
         )}
       </div>
 
-      {/* Upload Panel */}
-      <div
-        className="card"
-        style={{
-          height: "fit-content",
-          display: "flex",
-          flexDirection: "column",
-          gap: "16px",
-        }}
-      >
-        <h3 style={{ fontSize: "16px", fontWeight: 500 }}>
-          {t("dashboard.uploadTitle")}
-        </h3>
-
-        <form
-          onSubmit={handleUpload}
-          style={{ display: "flex", flexDirection: "column", gap: "16px" }}
-        >
-          <div
-            className={`upload-zone ${isDragging ? "active" : ""}`}
-            onClick={() => document.getElementById("file-input").click()}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-          >
-            <Upload
-              size={32}
-              color="var(--text-muted)"
-              style={{ margin: "0 auto 12px" }}
-            />
-            {file ? (
-              <div>
-                <p
-                  style={{
-                    fontSize: "14px",
-                    fontWeight: 500,
-                    color: "var(--text-primary)",
-                  }}
-                >
-                  {file.name}
-                </p>
-                <p
-                  style={{
-                    fontSize: "12px",
-                    color: "var(--text-muted)",
-                    marginTop: "4px",
-                  }}
-                >
-                  {formatSize(file.size)}
-                </p>
-              </div>
-            ) : (
-              <div>
-                <p style={{ fontSize: "14px", fontWeight: 500 }}>
-                  {t("dashboard.dragDropText")}
-                </p>
-                <p
-                  style={{
-                    fontSize: "12px",
-                    color: "var(--text-muted)",
-                    marginTop: "4px",
-                  }}
-                >
-                  {language === "en"
-                    ? "Support PDF, DOC, PNG, JPG... Max 10MB"
-                    : "Hỗ trợ PDF, DOC, PNG, JPG... Tối đa 10MB"}
-                </p>
-              </div>
-            )}
-            <input
-              id="file-input"
-              type="file"
-              onChange={(e) => setFile(e.target.files[0])}
-              style={{ display: "none" }}
-            />
+    {/* Upload Modal Overlay */}
+    {showUploadModal && (
+      <div className="modal-overlay">
+        <div className="modal-content" style={{ maxWidth: "500px", padding: "24px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+            <h3 style={{ fontSize: "18px", fontWeight: 600, margin: 0 }}>
+              {t("dashboard.uploadTitle")}
+            </h3>
+            <button className="btn btn-secondary" onClick={() => setShowUploadModal(false)} style={{ padding: "4px 10px", fontSize: "12px" }}>
+              {t("common.close")}
+            </button>
           </div>
 
-          <div>
-            <label
-              style={{
-                display: "block",
-                fontSize: "13px",
-                color: "var(--text-secondary)",
-                marginBottom: "6px",
-              }}
-            >
-              {t("dashboard.assignCat")}
-            </label>
-            <select
-              value={uploadCategory}
-              onChange={(e) => setUploadCategory(e.target.value)}
-            >
-              <option value="">{t("dashboard.selectCat")}</option>
-              {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <button
-            className="btn btn-primary"
-            type="submit"
-            disabled={!file || uploading}
-            style={{ justifyContent: "center" }}
+          <form
+            onSubmit={handleUpload}
+            style={{ display: "flex", flexDirection: "column", gap: "16px" }}
           >
-            {uploading ? t("dashboard.uploading") : t("dashboard.uploadBtn")}
-          </button>
-        </form>
+            <div
+              className={`upload-zone ${isDragging ? "active" : ""}`}
+              onClick={() => document.getElementById("file-input").click()}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+            >
+              <Upload
+                size={32}
+                color="var(--text-muted)"
+                style={{ margin: "0 auto 12px" }}
+              />
+              {file ? (
+                <div>
+                  <p
+                    style={{
+                      fontSize: "14px",
+                      fontWeight: 500,
+                      color: "var(--text-primary)",
+                      wordBreak: "break-all"
+                    }}
+                  >
+                    {file.name}
+                  </p>
+                  <p
+                    style={{
+                      fontSize: "12px",
+                      color: "var(--text-muted)",
+                      marginTop: "4px",
+                    }}
+                  >
+                    {formatSize(file.size)}
+                  </p>
+                </div>
+              ) : (
+                <div>
+                  <p style={{ fontSize: "14px", fontWeight: 500 }}>
+                    {t("dashboard.dragDropText")}
+                  </p>
+                  <p
+                    style={{
+                      fontSize: "12px",
+                      color: "var(--text-muted)",
+                      marginTop: "4px",
+                    }}
+                  >
+                    {language === "en"
+                      ? "Support PDF, DOC, PNG, JPG... Max 10MB"
+                      : "Hỗ trợ PDF, DOC, PNG, JPG... Tối đa 10MB"}
+                  </p>
+                </div>
+              )}
+              <input
+                id="file-input"
+                type="file"
+                onChange={(e) => setFile(e.target.files[0])}
+                style={{ display: "none" }}
+              />
+            </div>
+
+            <div>
+              <label
+                style={{
+                  display: "block",
+                  fontSize: "13px",
+                  color: "var(--text-secondary)",
+                  marginBottom: "6px",
+                }}
+              >
+                {t("dashboard.assignCat")}
+              </label>
+              <select
+                value={uploadCategory}
+                onChange={(e) => setUploadCategory(e.target.value)}
+              >
+                <option value="">{t("dashboard.selectCat")}</option>
+                {categories.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label
+                style={{
+                  display: "block",
+                  fontSize: "13px",
+                  color: "var(--text-secondary)",
+                  marginBottom: "6px",
+                }}
+              >
+                {language === "en" ? "Access Visibility" : "Phạm vi chia sẻ (Phòng ban)"}
+              </label>
+              <select
+                value={uploadAccessRole}
+                onChange={(e) => setUploadAccessRole(e.target.value)}
+              >
+                <option value="PUBLIC">{language === "en" ? "Public (Everyone)" : "Công khai (Tất cả)"}</option>
+                {departments.map((dept) => (
+                  <option key={dept.name} value={dept.name}>
+                    {dept.name.replace("ROLE_", "").toUpperCase()}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <button
+              className="btn btn-primary"
+              type="submit"
+              disabled={!file || uploading}
+              style={{ justifyContent: "center" }}
+            >
+              {uploading ? t("dashboard.uploading") : t("dashboard.uploadBtn")}
+            </button>
+          </form>
+        </div>
       </div>
-    </div>
+    )}
 
     {/* Share Modal */}
     {sharingDoc && (
@@ -1284,6 +1419,77 @@ export default function Dashboard() {
               </div>
             )}
           </div>
+        </div>
+      </div>
+    )}
+
+    {/* Edit Document Modal */}
+    {editingDoc && (
+      <div className="modal-overlay">
+        <div className="modal-content" style={{ maxWidth: "500px", padding: "24px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+            <h3 style={{ fontSize: "18px", fontWeight: 600, letterSpacing: "-0.5px", margin: 0 }}>
+              {language === "en" ? "Edit Document Properties" : "Chỉnh sửa thông tin tài liệu"}
+            </h3>
+            <button className="btn btn-secondary" onClick={() => setEditingDoc(null)} style={{ padding: "4px 10px", fontSize: "12px" }}>
+              {t("common.close")}
+            </button>
+          </div>
+          
+          <form onSubmit={handleEditSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+            <div>
+              <label style={{ display: "block", fontSize: "13px", color: "var(--text-secondary)", marginBottom: "6px" }}>
+                {t("dashboard.colName")}
+              </label>
+              <input
+                type="text"
+                className="input-field"
+                value={editingDoc.fileName}
+                disabled
+                style={{ width: "100%", opacity: 0.7 }}
+              />
+            </div>
+
+            <div>
+              <label style={{ display: "block", fontSize: "13px", color: "var(--text-secondary)", marginBottom: "6px" }}>
+                {t("category.title")}
+              </label>
+              <select
+                value={editCategory}
+                onChange={(e) => setEditCategory(e.target.value)}
+                style={{ width: "100%" }}
+              >
+                <option value="">{t("dashboard.selectCat")}</option>
+                {categories.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label style={{ display: "block", fontSize: "13px", color: "var(--text-secondary)", marginBottom: "6px" }}>
+                {language === "en" ? "Access Visibility" : "Phạm vi chia sẻ (Phòng ban)"}
+              </label>
+              <select
+                value={editAccessRole}
+                onChange={(e) => setEditAccessRole(e.target.value)}
+                style={{ width: "100%" }}
+              >
+                <option value="PUBLIC">{language === "en" ? "Public (Everyone)" : "Công khai (Tất cả)"}</option>
+                {departments.map((dept) => (
+                  <option key={dept.name} value={dept.name}>
+                    {dept.name.replace("ROLE_", "").toUpperCase()}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <button type="submit" className="btn btn-primary" style={{ justifyContent: "center", marginTop: "8px" }}>
+              {t("common.submit")}
+            </button>
+          </form>
         </div>
       </div>
     )}

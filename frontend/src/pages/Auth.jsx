@@ -43,12 +43,12 @@ export default function Auth() {
       alignItems: 'center',
       justifyContent: 'center',
       padding: '20px',
-      background: 'radial-gradient(circle at top, #111218 0%, #090a0c 100%)'
+      backgroundColor: 'var(--bg-primary)'
     }}>
-      <div className="card" style={{ width: '100%', maxWidth: '400px', backdropFilter: 'blur(10px)' }}>
+      <div className="card" style={{ width: '100%', maxWidth: '400px', backgroundColor: 'var(--bg-secondary)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '24px', justifyContent: 'center' }}>
-          <Shield size={28} color="#5e6ad2" />
-          <h1 style={{ fontSize: '20px', fontWeight: 600, letterSpacing: '-0.5px' }}>{t('sidebar.title')}</h1>
+          <Shield size={28} color="var(--accent)" />
+          <h1 style={{ fontSize: '20px', fontWeight: 600, letterSpacing: '-0.5px', color: 'var(--text-primary)' }}>{t('sidebar.title')}</h1>
         </div>
 
         <h2 style={{ fontSize: '18px', fontWeight: 500, marginBottom: '8px', textAlign: 'center' }}>

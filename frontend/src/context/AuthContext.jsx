@@ -40,6 +40,7 @@ export const AuthProvider = ({ children }) => {
         } catch (e) {
           // Token is likely invalid or expired
           localStorage.removeItem('token');
+          localStorage.removeItem('refreshToken');
           localStorage.removeItem('user');
           setUser(null);
           setToken(null);
@@ -62,10 +63,11 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     const response = await api.post('/auth/login', { email, password });
-    const { token: jwtToken } = response.result;
+    const { token: jwtToken, refreshToken } = response.result;
     
     // Lưu token
     localStorage.setItem('token', jwtToken);
+    localStorage.setItem('refreshToken', refreshToken);
     setToken(jwtToken);
 
     try {
@@ -83,15 +85,24 @@ export const AuthProvider = ({ children }) => {
     return await api.post('/users/create', { email, name, password });
   };
 
-  const logout = () => {
+  const logout = async () => {
+    const refreshToken = localStorage.getItem('refreshToken');
+    if (refreshToken) {
+      try {
+        await api.post('/auth/logout', { refreshToken });
+      } catch (e) {
+        console.error("Logout request failed", e);
+      }
+    }
     localStorage.removeItem('token');
+    localStorage.removeItem('refreshToken');
     localStorage.removeItem('user');
     setUser(null);
     setToken(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, token, loading, login, register, logout, fetchMyInfo }}>
       {children}
     </AuthContext.Provider>
   );

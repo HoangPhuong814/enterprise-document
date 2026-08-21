@@ -133,6 +133,7 @@ export default function Category() {
               {categories.map((cat) => (
                 <div
                   key={cat.id}
+                  className="hover-interactive animate-slide-up"
                   style={{
                     display: 'flex',
                     justifyContent: 'space-between',
@@ -140,7 +141,7 @@ export default function Category() {
                     padding: '16px',
                     backgroundColor: 'var(--bg-primary)',
                     border: '1px solid var(--border-subtle)',
-                    borderRadius: '8px',
+                    borderRadius: 'var(--border-radius)',
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>

@@ -11,6 +11,8 @@ import Announcement from "./pages/Announcement";
 import Staff from "./pages/Staff";
 import Chat from "./pages/Chat";
 import AuditLogs from "./pages/AuditLogs";
+import UserSettings from "./pages/UserSettings";
+import RolesPermissions from "./pages/RolesPermissions";
 import {
   Shield,
   FileText,
@@ -27,6 +29,8 @@ import {
   Users,
   MessageSquare,
   History,
+  Settings as SettingsIcon,
+  Key,
 } from "lucide-react";
 
 function AppContent() {
@@ -176,28 +180,7 @@ function AppContent() {
           <nav style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
             <button
               onClick={() => setCurrentTab("documents")}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "12px",
-                width: "100%",
-                padding: "10px 12px",
-                borderRadius: "8px",
-                background:
-                  currentTab === "documents"
-                    ? "var(--bg-tertiary)"
-                    : "transparent",
-                color:
-                  currentTab === "documents"
-                    ? "var(--text-primary)"
-                    : "var(--text-secondary)",
-                border: "none",
-                cursor: "pointer",
-                fontFamily: "inherit",
-                fontSize: "14px",
-                fontWeight: 500,
-                textAlign: "left",
-              }}
+              className={`sidebar-link ${currentTab === "documents" ? "active" : ""}`}
             >
               <FileText size={18} />
               {t("sidebar.documents")}
@@ -205,28 +188,7 @@ function AppContent() {
 
             <button
               onClick={() => setCurrentTab("categories")}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "12px",
-                width: "100%",
-                padding: "10px 12px",
-                borderRadius: "8px",
-                background:
-                  currentTab === "categories"
-                    ? "var(--bg-tertiary)"
-                    : "transparent",
-                color:
-                  currentTab === "categories"
-                    ? "var(--text-primary)"
-                    : "var(--text-secondary)",
-                border: "none",
-                cursor: "pointer",
-                fontFamily: "inherit",
-                fontSize: "14px",
-                fontWeight: 500,
-                textAlign: "left",
-              }}
+              className={`sidebar-link ${currentTab === "categories" ? "active" : ""}`}
             >
               <Folder size={18} />
               {t("sidebar.categories")}
@@ -234,26 +196,7 @@ function AppContent() {
 
             <button
               onClick={() => setCurrentTab("trash")}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "12px",
-                width: "100%",
-                padding: "10px 12px",
-                borderRadius: "8px",
-                background:
-                  currentTab === "trash" ? "var(--bg-tertiary)" : "transparent",
-                color:
-                  currentTab === "trash"
-                    ? "var(--text-primary)"
-                    : "var(--text-secondary)",
-                border: "none",
-                cursor: "pointer",
-                fontFamily: "inherit",
-                fontSize: "14px",
-                fontWeight: 500,
-                textAlign: "left",
-              }}
+              className={`sidebar-link ${currentTab === "trash" ? "active" : ""}`}
             >
               <Trash2 size={18} />
               {t("sidebar.trash")}
@@ -261,26 +204,7 @@ function AppContent() {
 
             <button
               onClick={() => setCurrentTab("announcements")}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "12px",
-                width: "100%",
-                padding: "10px 12px",
-                borderRadius: "8px",
-                background:
-                  currentTab === "announcements" ? "var(--bg-tertiary)" : "transparent",
-                color:
-                  currentTab === "announcements"
-                    ? "var(--text-primary)"
-                    : "var(--text-secondary)",
-                border: "none",
-                cursor: "pointer",
-                fontFamily: "inherit",
-                fontSize: "14px",
-                fontWeight: 500,
-                textAlign: "left",
-              }}
+              className={`sidebar-link ${currentTab === "announcements" ? "active" : ""}`}
             >
               <Megaphone size={18} />
               {t("sidebar.announcements")}
@@ -288,55 +212,25 @@ function AppContent() {
 
             <button
               onClick={() => setCurrentTab("chat")}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "12px",
-                width: "100%",
-                padding: "10px 12px",
-                borderRadius: "8px",
-                background:
-                  currentTab === "chat" ? "var(--bg-tertiary)" : "transparent",
-                color:
-                  currentTab === "chat"
-                    ? "var(--text-primary)"
-                    : "var(--text-secondary)",
-                border: "none",
-                cursor: "pointer",
-                fontFamily: "inherit",
-                fontSize: "14px",
-                fontWeight: 500,
-                textAlign: "left",
-              }}
+              className={`sidebar-link ${currentTab === "chat" ? "active" : ""}`}
             >
               <MessageSquare size={18} />
               {t("sidebar.chat")}
+            </button>
+
+            <button
+              onClick={() => setCurrentTab("settings")}
+              className={`sidebar-link ${currentTab === "settings" ? "active" : ""}`}
+            >
+              <SettingsIcon size={18} />
+              {t("sidebar.settings")}
             </button>
 
             {(user?.email?.startsWith("admin") || user?.roles?.some(r => r.name === "ADMIN")) && (
               <>
                 <button
                   onClick={() => setCurrentTab("staff")}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "12px",
-                    width: "100%",
-                    padding: "10px 12px",
-                    borderRadius: "8px",
-                    background:
-                      currentTab === "staff" ? "var(--bg-tertiary)" : "transparent",
-                    color:
-                      currentTab === "staff"
-                        ? "var(--text-primary)"
-                        : "var(--text-secondary)",
-                    border: "none",
-                    cursor: "pointer",
-                    fontFamily: "inherit",
-                    fontSize: "14px",
-                    fontWeight: 500,
-                    textAlign: "left",
-                  }}
+                  className={`sidebar-link ${currentTab === "staff" ? "active" : ""}`}
                 >
                   <Users size={18} />
                   {t("sidebar.staff")}
@@ -344,29 +238,18 @@ function AppContent() {
 
                 <button
                   onClick={() => setCurrentTab("auditLogs")}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "12px",
-                    width: "100%",
-                    padding: "10px 12px",
-                    borderRadius: "8px",
-                    background:
-                      currentTab === "auditLogs" ? "var(--bg-tertiary)" : "transparent",
-                    color:
-                      currentTab === "auditLogs"
-                        ? "var(--text-primary)"
-                        : "var(--text-secondary)",
-                    border: "none",
-                    cursor: "pointer",
-                    fontFamily: "inherit",
-                    fontSize: "14px",
-                    fontWeight: 500,
-                    textAlign: "left",
-                  }}
+                  className={`sidebar-link ${currentTab === "auditLogs" ? "active" : ""}`}
                 >
                   <History size={18} />
                   {t("sidebar.auditLogs")}
+                </button>
+
+                <button
+                  onClick={() => setCurrentTab("rolesPermissions")}
+                  className={`sidebar-link ${currentTab === "rolesPermissions" ? "active" : ""}`}
+                >
+                  <Key size={18} />
+                  {t("sidebar.rolesPermissions")}
                 </button>
               </>
             )}
@@ -506,21 +389,7 @@ function AppContent() {
         }}
       >
         {/* Top bar header */}
-        <header
-          style={{
-            height: "64px",
-            borderBottom: "1px solid var(--border-subtle)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            padding: "0 32px",
-            backgroundColor: "var(--header-bg, rgba(9, 10, 12, 0.4))",
-            backdropFilter: "blur(8px)",
-            position: "sticky",
-            top: 0,
-            zIndex: 100,
-          }}
-        >
+        <header className="main-header">
           <div
             style={{
               display: "flex",
@@ -551,7 +420,11 @@ function AppContent() {
                         ? t("sidebar.chat")
                         : currentTab === "auditLogs"
                           ? t("sidebar.auditLogs")
-                          : t("sidebar.staff")}
+                          : currentTab === "settings"
+                            ? t("sidebar.settings")
+                            : currentTab === "rolesPermissions"
+                              ? t("sidebar.rolesPermissions")
+                              : t("sidebar.staff")}
             </span>
           </div>
 
@@ -594,6 +467,8 @@ function AppContent() {
           {currentTab === "chat" && <Chat />}
           {currentTab === "staff" && (user?.email?.startsWith("admin") || user?.roles?.some(r => r.name === "ADMIN")) && <Staff />}
           {currentTab === "auditLogs" && (user?.email?.startsWith("admin") || user?.roles?.some(r => r.name === "ADMIN")) && <AuditLogs />}
+          {currentTab === "settings" && <UserSettings />}
+          {currentTab === "rolesPermissions" && (user?.email?.startsWith("admin") || user?.roles?.some(r => r.name === "ADMIN")) && <RolesPermissions />}
         </div>
       </main>
     </div>

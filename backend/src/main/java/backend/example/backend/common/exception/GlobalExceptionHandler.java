@@ -1,11 +1,13 @@
 package backend.example.backend.common.exception;
 
 import backend.example.backend.common.response.ApiResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = AppException.class)
@@ -20,6 +22,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = Exception.class)
     public ResponseEntity<ApiResponse<?>> handlingRuntimeException(Exception exception) {
+        log.error("Unhandled exception occurred: ", exception);
         ApiResponse<?> apiResponse = ApiResponse.builder()
                 .code(ErrorCode.UNCATEGORIZED_EXCEPTION.getCode())
                 .message(ErrorCode.UNCATEGORIZED_EXCEPTION.getMessage())

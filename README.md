@@ -1,50 +1,34 @@
-# 🏢 Enterprise Document Hub (Hệ Thống Quản Lý Tài Liệu Doanh Nghiệp)
+# Enterprise Document Hub
 
-<!-- Badges -->
-<div align="left">
-  <img src="https://img.shields.io/badge/Spring_Boot-3.4%20%2F%204.0-brightgreen?style=for-the-badge&logo=spring" alt="Spring Boot" />
-  <img src="https://img.shields.io/badge/React-19-blue?style=for-the-badge&logo=react" alt="React" />
-  <img src="https://img.shields.io/badge/PostgreSQL-16-blue?style=for-the-badge&logo=postgresql" alt="PostgreSQL" />
-  <img src="https://img.shields.io/badge/MongoDB-7.0-47A248?style=for-the-badge&logo=mongodb" alt="MongoDB" />
-  <img src="https://img.shields.io/badge/Redis-7-red?style=for-the-badge&logo=redis" alt="Redis" />
-  <img src="https://img.shields.io/badge/AWS_S3-Storage-FF9900?style=for-the-badge&logo=amazonaws" alt="AWS S3" />
-  <img src="https://img.shields.io/badge/WebSockets-Real--time-019733?style=for-the-badge&logo=socket.io" alt="WebSockets" />
-  <img src="https://img.shields.io/badge/Docker-Container-2496ED?style=for-the-badge&logo=docker" alt="Docker" />
-</div>
+Enterprise Document Hub is a professional, enterprise-grade internal document management and sharing system. The system is designed with a hybrid database architecture combining SQL (PostgreSQL) and NoSQL (MongoDB), integrated with AWS S3 cloud storage, a Redis caching/blacklist mechanism, real-time communication via WebSockets, and a modern, minimalist user interface supporting both light and dark modes.
+
+The project is designed to address real-world enterprise requirements:
+1. Secure and Decentralized Document Storage: Direct integration with AWS S3 for binary storage, masking actual S3 URLs using the Presigned URL mechanism.
+2. Role-Based Access Control (RBAC): Fine-grained user authorization down to each API endpoint using JWT tokens and Spring Security.
+3. High-Performance Audit Logging: Utilizes Spring AOP (Aspect-Oriented Programming) to log user interactions asynchronously into MongoDB, minimizing primary database load.
+4. Advanced File Sharing: Support for generating passcode-protected public file download links with expiration times, download limits, and flexible link revocation.
+5. Real-Time Notifications: Automated WebSocket-based alerts sent to document owners immediately when someone downloads a file through their shared link.
+6. Trash Bin (Soft Delete & Restore): Supports temporary deletion, recovery, and permanent deletion of files from both the database and AWS S3.
 
 ---
 
-## 📖 Giới Thiệu Dự Án
-**Enterprise Document Hub** là một hệ thống quản lý và chia sẻ tài liệu nội bộ cấp doanh nghiệp chuyên nghiệp. Dự án được thiết kế theo mô hình kiến trúc cơ sở dữ liệu kết hợp (**Hybrid Database**) giữa SQL (PostgreSQL) và NoSQL (MongoDB), tích hợp dịch vụ lưu trữ đám mây AWS S3, cơ chế Caching/Blacklist bằng Redis, kênh truyền thông tải tin thời gian thực **WebSockets** và giao diện người dùng tối giản hiện đại (hỗ trợ Light/Dark Mode theo phong cách Vercel/Linear).
-
-Dự án được tối ưu và thiết kế để giải quyết các bài toán thực tế trong môi trường doanh nghiệp:
-1. **Lưu trữ tài liệu bảo mật & phi tập trung:** Liên kết trực tiếp với dịch vụ AWS S3 lưu trữ nhị phân, ẩn đường dẫn thật bằng cơ chế Presigned URL.
-2. **Quản lý phân quyền chặt chẽ (RBAC):** Phân quyền người dùng chi tiết tới từng API endpoint dựa trên JWT Token và Spring Security.
-3. **Audit Log hiệu năng cao:** Sử dụng AOP (Aspect-Oriented Programming) ghi nhận lịch sử tương tác bất đồng bộ trực tiếp vào MongoDB để giảm tải cho database chính.
-4. **Chia sẻ file nâng cao:** Hỗ trợ tạo liên kết tải file công khai có mật khẩu bảo vệ (passcode), giới hạn lượt tải, thời gian hết hạn và quản lý/thu hồi link chia sẻ linh hoạt.
-5. **Thông báo thời gian thực (Real-time Alert):** Tự động phát thông báo tới chủ sở hữu qua kết nối WebSockets ngay khi có người khác tải file qua link chia sẻ của họ.
-6. **Thùng rác & khôi phục (Trash Bin):** Hỗ trợ cơ chế xóa tạm thời (Soft Delete), phục hồi và xóa vĩnh viễn (Hard Delete khỏi DB & AWS S3).
-
-
----
-
-## 🛠️ Công Nghệ & Kiến Trúc Hệ Thống
+## Tech Stack & System Architecture
 
 ### 1. Tech Stack
-*   **Backend:** Java 17, Spring Boot 3.x, Spring Data JPA, Spring Security (OAuth2 Resource Server JWT), Spring AOP (AspectJ), Spring WebSockets, MapStruct, Lombok.
-*   **Frontend:** React JS 19 (Vite), Custom CSS (Vercel-like dark UI / Light Mode compatible), Lucide Icons, Context API.
-*   **Databases & Caching:**
-    *   **PostgreSQL (Relational):** Lưu trữ dữ liệu cấu trúc có tính toàn vẹn cao: `User`, `Role`, `Permission`, `Category`, `Document`, `DocumentShare`.
-    *   **MongoDB (NoSQL):** Lưu trữ dữ liệu log hoạt động phi cấu trúc (`ActivityLog`), đảm bảo tốc độ ghi nhanh và khả năng mở rộng tốt.
-    *   **Redis:** Quản lý JWT Blacklist (khi logout) và lưu trữ Refresh Token để phục vụ cơ chế Token Rotation.
-*   **Cloud Infrastructure:** AWS S3 (Simple Storage Service) để lưu trữ file an toàn, tránh phình to ổ cứng Server.
-*   **Containerization & Proxy:** Docker, Docker Compose, Nginx.
+* Backend: Java 17, Spring Boot 3.x, Spring Data JPA, Spring Security (OAuth2 Resource Server JWT), Spring AOP (AspectJ), Spring WebSockets, MapStruct, Lombok.
+* Frontend: React 19 (Vite), Custom CSS (Vercel-like dark UI / Light Mode compatible), Lucide Icons, Context API.
+* Databases & Caching:
+    * PostgreSQL (Relational): Stores highly consistent, structured data including Users, Roles, Permissions, Categories, Documents, and Document Shares.
+    * MongoDB (NoSQL): Stores unstructured activity logs (`ActivityLog`), ensuring high-speed write performance and scalability.
+    * Redis: Manages JWT blacklist during logout and stores Refresh Tokens for Token Rotation.
+* Cloud Infrastructure: AWS S3 (Simple Storage Service) for secure file storage, preventing server disk space bloat.
+* Containerization & Proxy: Docker, Docker Compose, Nginx.
 
 ---
 
-### 2. Sơ Đồ Kiến Trúc Hệ Thống (System Architecture)
+### 2. System Architecture Diagram
 
-Dưới đây là mô hình hoạt động và luồng trao đổi dữ liệu giữa các thành phần của hệ thống:
+The diagram below displays the system components and data flows:
 
 ```mermaid
 graph TD
@@ -59,9 +43,9 @@ graph TD
 
 ---
 
-## 💾 Thiết Kế Cơ Sở Dữ Liệu (Database Schema)
+## Database Schema
 
-Dự án áp dụng mô hình kết hợp giữa SQL và NoSQL:
+The database design implements a hybrid structure combining PostgreSQL and MongoDB:
 
 ```mermaid
 erDiagram
@@ -138,92 +122,137 @@ erDiagram
 
 ---
 
-## ⚡ Các Tính Năng Nghiệp Vụ Cốt Lõi
+## Core Business Features
 
-### 🔑 1. Hệ Thống Xác Thực & Phân Quyền (RBAC)
-*   **Xác thực không trạng thái (Stateless Auth):** Sử dụng JSON Web Token (JWT) được ký bằng thuật toán HS512.
-*   **Redis Token Blacklisting & Refresh Rotation:** 
-    *   Hỗ trợ `Access Token` thời hạn ngắn và `Refresh Token` thời hạn dài.
-    *   Khi người dùng Logout, Access Token cũ bị đưa vào blacklist lưu trên Redis tương ứng với thời gian sống còn lại của Token để chống tấn công phát lại (Replay Attacks).
-*   **Phân quyền dựa trên Role & Permission (RBAC):** Cấu hình chặt chẽ sử dụng `@PreAuthorize` ở Controller. Ví dụ: Chỉ tài khoản có Role `ADMIN` mới được phép thao tác CRUD Category, CRUD Role, và quản lý người dùng.
+### 1. Authentication & Authorization (RBAC)
+* Stateless Authentication: Uses JSON Web Tokens (JWT) signed with the HS512 algorithm.
+* Redis Token Blacklisting & Refresh Rotation:
+    * Supports short-lived Access Tokens and long-lived Refresh Tokens.
+    * When a user logs out, the active Access Token is added to a Redis-based blacklist for its remaining time-to-live (TTL) to protect against Replay Attacks.
+* Role & Permission Based Access Control (RBAC): Secured using `@PreAuthorize` annotations at the Controller layer. For example, only users with the `ADMIN` role can manage categories, roles, and users.
 
-### 📂 2. Quản Lý Tài Liệu Với AWS S3
-*   **Lưu trữ đám mây Private:** Tài liệu tải lên được gửi trực tiếp lên AWS S3 dưới dạng file private (không thể truy cập công khai trực tiếp).
-*   **Sử dụng Presigned URL:** Khi người dùng muốn tải xuống file, hệ thống sẽ sinh ra một URL truy cập tạm thời có hiệu lực tối đa trong 10 phút. Đảm bảo file được bảo vệ tối đa và không bị lộ đường dẫn thực tế.
-*   **Phân loại theo danh mục (Category):** Tổ chức dữ liệu thông minh theo từng thư mục/nhóm danh mục để dễ quản lý.
+### 2. Document Management & Access Control
+* Private Cloud Storage: Uploaded files are sent directly to AWS S3 as private objects, meaning they cannot be accessed directly via public HTTP URLs.
+* S3 Presigned URLs: When a user requests to download a file, the system generates a temporary access URL valid for a maximum of 10 minutes. This ensures document security and hides the actual S3 object path.
+* Category Organization: Organizes files by category. Users can change the category of files through the edit dialog on the UI.
+* Department-based Access Control: Supports restricting document visibility upon upload (Public or restricted to departments like `IT`, `ACCOUNTING`). Regular department members can only view public documents, documents they uploaded, or documents belonging to their own department.
+* "My Documents" View: Real-time filter on the Dashboard to quickly view files uploaded by the logged-in user.
 
-### 🗑️ 3. Thùng Rác (Trash Bin - Soft Delete & Restore)
-*   **Xóa tạm thời (Soft Delete):** Xóa tài liệu mà không thực sự mất file. Hệ thống gán cờ `isDeleted = true` và ghi nhận thời gian xóa `deletedAt`. Tài liệu bị ẩn khỏi Dashboard chính.
-*   **Khôi phục tài liệu (Restore):** Khôi phục tài liệu đã xóa tạm thời về lại Dashboard chỉ với 1 click.
-*   **Xóa vĩnh viễn (Hard Delete):** Xóa bản ghi trong PostgreSQL và thực hiện gọi AWS S3 SDK xóa trực tiếp vật thể nhị phân trên Bucket của AWS, giải phóng hoàn toàn dung lượng lưu trữ.
+### 3. Trash Bin (Soft Delete & Restore)
+* Soft Delete: Hides documents instead of deleting them permanently. The system marks `isDeleted = true` and records the deletion time `deletedAt`, filtering them out from the main dashboard.
+* Restore: Recovers soft-deleted documents back to the main dashboard with a single click.
+* Hard Delete: Permanently deletes the database record in PostgreSQL and invokes the AWS S3 SDK to delete the binary object from the S3 bucket, releasing cloud storage space.
 
-### 🔗 4. Quản Lý Chia Sẻ Tài Liệu Nâng Cao (Advanced Share Link)
-*   **Sinh mã token độc nhất:** Link chia sẻ được gán mã Token ngẫu nhiên (UUID/String) độc bản.
-*   **Tính năng bảo mật nâng cao:**
-    *   **Mật khẩu bảo vệ (Passcode):** Khách truy cập bắt buộc phải nhập đúng Passcode được đặt bởi người chia sẻ để lấy link tải.
-    *   **Hạn dùng link (Expired Date):** Hỗ trợ chọn nhanh thời hạn hết hạn (`+1 giờ`, `+1 ngày`, `+7 ngày`, `Vô hạn`) giúp cải thiện UX tối đa.
-    *   **Giới hạn số lần tải tối đa (Max Downloads):** Link tự động đóng khi đạt đủ số lượt download cấu hình.
-*   **Xem & Thu hồi link:** Giao diện quản lý hiển thị đầy đủ thông số hoạt động của các link hiện tại (lượt tải thực tế, hạn dùng, mật mã) và cho phép **Thu hồi (xóa)** link tức thời.
-*   **Khách tải file công khai:** Cho phép người dùng không có tài khoản tải tài liệu qua API `/shares/{token}/download` sau khi vượt qua các bước xác thực điều kiện trên.
+### 4. Advanced Share Links
+* Unique Share Tokens: Share links are associated with a unique, randomly generated UUID/Token string.
+* Advanced Security Configurations:
+    * Passcode Protection: Guests must enter a correct passcode set by the owner to access and download the file.
+    * Link Expiration: Supports quick selection of link expiration time (`+1 hour`, `+1 day`, `+7 days`, `Unlimited`) to enhance UX.
+    * Max Downloads Limit: The link automatically deactivates when the configured download limit is reached.
+* View & Revoke Links: The share management panel displays all active shared links, including download count, expiration date, passcode, and allows instant link revocation (deletion).
+* Guest File Download: Allows users without an account to download shared documents via the `/shares/{token}/download` endpoint after passing all verification rules.
 
-### 🔔 5. Thông Báo Thời Gian Thực (Real-time WebSockets)
-*   Khi có người dùng (kể cả khách vãng lai) tải file qua link chia sẻ công khai, Backend sẽ tự động xác định email của Uploader và đẩy một thông báo thời gian thực qua kênh WebSockets.
-*   Frontend lắng nghe và hiển thị một Toast Alert màu xanh dương trượt nhẹ nhàng ở góc màn hình để báo hiệu cho Uploader biết tài liệu của họ vừa có lượt tải mới.
+### 5. WebSockets Chat & Alerts
+* Real-time Chat: Integrated instant messaging interface supporting:
+    * 1-to-1 direct messaging between colleagues.
+    * Group chat rooms separated by Department (IT, Accounting, etc.), routing messages automatically based on user roles.
+    * Robust connection handling with automatic reconnects upon disconnection without page refresh.
+* Download Alerts: When a guest downloads a file via a public share link, the backend identifies the document owner and pushes a real-time notification via WebSockets. The frontend intercepts this event to display a smooth slide-in toast alert.
 
-### 📝 6. Giám Sát Hoạt Động Hệ Thống (AOP Audit Logging)
-*   Áp dụng kỹ thuật **Spring AOP (Aspect Oriented Programming)** với Aspect `ActivityLogAspect` để tự động bắt và ghi nhận log các sự kiện quan trọng (`UPLOAD_DOCUMENT`, `DOWNLOAD_DOCUMENT`, `DELETE_DOCUMENT`).
-*   Giúp tách biệt code nghiệp vụ (Business Logic) và code giám sát (Logging), giúp mã nguồn sạch sẽ (`Clean Code`).
-*   Toàn bộ log được lưu trữ bất đồng bộ vào **MongoDB** nhằm giải phóng tải tác vụ cho cơ sở dữ liệu PostgreSQL.
+### 6. System Monitoring (AOP Audit Logging)
+* Leverages Spring AOP (Aspect-Oriented Programming) via `ActivityLogAspect` to intercept and log critical operations (`UPLOAD_DOCUMENT`, `DOWNLOAD_DOCUMENT`, `DELETE_DOCUMENT`).
+* Uses standard `JoinPoint` configurations and dynamic entity querying to capture the actual document name instead of just the database ID in the logs, avoiding server compilation issues or parameter optimization conflicts.
+* Audit logs are stored asynchronously in MongoDB to prevent database locks and minimize the write load on the primary PostgreSQL database.
 
-### 🎨 7. Trải Nghiệm Người Dùng Tinh Tế (UX/UI Polish)
-*   **Hộp thoại xác nhận tùy biến (Custom Confirm Modal Context):** Loại bỏ hoàn toàn các hàm `window.confirm` và `alert` mặc định thô sơ của trình duyệt. Thay thế bằng Confirm Dialog mượt mà sử dụng React Context, thiết kế glassmorphic hiện đại kết hợp hoạt cảnh chuyển động tinh tế (`scale-up`, `fade-in`).
-*   **Chế độ Sáng / Tối (Light & Dark Theme Switcher):** Cho phép chuyển đổi nhanh giao diện sáng hoặc tối chỉ bằng một click chuột, lưu tùy chọn trong `localStorage` để tự động khôi phục giao diện ở lần truy cập tiếp theo.
+### 7. Refined User Experience (UX/UI Polish)
+* Custom Confirm Modal Context: Eliminates raw browser `confirm()` and `alert()` calls. Uses a custom confirmation modal powered by React Context, styled with a modern glassmorphic design and smooth transitions (`scale-up`, `fade-in`).
+* Light / Dark Theme Switcher: Instant toggling of UI theme saved directly to `localStorage` to persist user preference.
 
 ---
 
-## 📂 Cấu Trúc Thư Mục Dự Án (Project Structure)
+## Application Screenshots
+
+Here are the screenshots of the primary user interfaces of the Enterprise Document Hub system:
+
+### 1. Authentication
+* **Login Page:**
+  ![Login Page](docs/screenshots/login_page.png)
+
+### 2. Workspace Tabs
+* **Dashboard (Documents Management):**
+  ![Dashboard](docs/screenshots/dashboard.png)
+  
+* **Categories:**
+  ![Categories](docs/screenshots/categories.png)
+
+* **Trash Bin (Soft Delete Management):**
+  ![Trash Bin](docs/screenshots/trash.png)
+
+### 3. Collaboration & Communication
+* **Announcements Board:**
+  ![Announcements](docs/screenshots/announcements.png)
+
+* **Real-time Chat (Department & Direct Message):**
+  ![Chat](docs/screenshots/chat.png)
+
+### 4. Admin Management Dashboard
+* **Staff Directory & Management:**
+  ![Staff](docs/screenshots/staff.png)
+
+* **System Audit Logs:**
+  ![Audit Logs](docs/screenshots/audit_logs.png)
+
+* **Roles & Permissions Configurator:**
+  ![Roles & Permissions](docs/screenshots/roles_permissions.png)
+
+### 5. Personalization
+* **Dashboard (Light Mode):**
+  ![Dashboard Light Mode](docs/screenshots/dashboard_light.png)
+
+---
+
+## Project Structure
 
 ```text
 document-hub/
-├── docker-compose.yml          # Quản lý PG, Mongo, Redis, App, Nginx
-├── .env                        # Chứa cấu hình bảo mật môi trường phát triển
-├── backend/                    # --- MÃ NGUỒN BACKEND (SPRING BOOT) ---
+├── docker-compose.yml          # Manages PostgreSQL, MongoDB, Redis, App, Nginx
+├── .env                        # Development environment security configurations
+├── backend/                    # --- BACKEND SOURCE CODE (SPRING BOOT) ---
 │   ├── src/main/java/backend/example/backend/
-│   │   ├── common/             # Chứa base entity, exception & format response chung, GlobalExceptionHandler
-│   │   ├── config/             # Cấu hình Security, AWS S3, JWT, WebSockets, Database Init
-│   │   └── modules/            # Các Module nghiệp vụ chính
-│   │       ├── auth/           # Đăng nhập, đăng ký, refresh, blacklist token
-│   │       ├── user/           # Quản lý User, Role, Permission (RBAC)
-│   │       ├── document/       # CRUD Document, Danh mục (Category), S3 Storage Service, share link management
+│   │   ├── common/             # Base entities, exception handlers, standard response format, GlobalExceptionHandler
+│   │   ├── config/             # Security, AWS S3, JWT, WebSockets, Database Initialization
+│   │   └── modules/            # Business modules
+│   │       ├── auth/           # Login, registration, token refresh, and blacklist (Redis)
+│   │       ├── user/           # User management, Roles, Permissions (RBAC)
+│   │       ├── document/       # CRUD Document, Category, S3 Storage Service, share link management
 │   │       └── log/            # AOP Activity Logging (MongoDB)
 │   ├── src/main/resources/
-│   │   └── application.yml     # File cấu hình database, cổng, JWT & AWS
-│   └── pom.xml                 # Khai báo thư viện & cấu hình maven build
-├── frontend/                   # --- MÃ NGUỒN FRONTEND (REACT JS) ---
+│   │   └── application.yml     # Database, port, JWT, and AWS configuration
+│   └── pom.xml                 # Maven dependency & build configuration
+├── frontend/                   # --- FRONTEND SOURCE CODE (REACT JS) ---
 │   ├── src/
-│   │   ├── assets/             # Logo, icon, font hình ảnh
-│   │   ├── context/            # AuthContext quản lý session, ConfirmContext quản lý hộp thoại confirm
-│   │   ├── pages/              # Giao diện (Auth, Dashboard, Category, Trash, ShareView)
-│   │   ├── services/           # Axios Interceptor giao tiếp backend, tự động gửi Token
-│   │   ├── App.jsx             # File điều hướng Router & quản lý theme
-│   │   ├── index.css           # Design system, tùy chỉnh CSS (Dark/Light mode Vercel)
-│   │   └── main.jsx            # Điểm khởi chạy React
-│   └── package.json            # Quản lý thư viện frontend
+│   │   ├── assets/             # Logos, icons, fonts, and images
+│   │   ├── context/            # AuthContext (session) & ConfirmContext (custom dialogs)
+│   │   ├── pages/              # UI Pages (Auth, Dashboard, Category, Trash, ShareView)
+│   │   ├── services/           # Axios Interceptor for API calls (auto JWT injection)
+│   │   ├── App.jsx             # Router navigation & Theme Provider
+│   │   ├── index.css           # Design system and custom CSS (Vercel-like Dark/Light mode styling)
+│   │   └── main.jsx            # React application entry point
+│   └── package.json            # Frontend dependencies and npm scripts
 ```
 
 ---
 
-## ⚙️ Hướng Dẫn Cài Đặt & Khởi Chạy Nhanh
+## Installation & Quick Start Guide
 
-### 1. Chuẩn Bị Trước
-*   Cài đặt sẵn **Java 17** hoặc **21**.
-*   Cài đặt sẵn **Node.js (v18+)** và **npm**.
-*   Cài đặt **Docker & Docker Compose**.
-*   Có tài khoản **AWS** hoạt động và 1 **Bucket S3** được cấu hình chế độ Private Access.
+### 1. Prerequisites
+* Java 17 or 21 installed.
+* Node.js (v18+) and npm installed.
+* Docker & Docker Compose installed.
+* Active AWS Account with a private S3 Bucket configured.
 
-### 2. Cấu Hình Biến Môi Trường (`.env`)
-Tạo file `.env` tại thư mục gốc của dự án (`/document-hub/.env`) và điền các thông số thích hợp:
-
+### 2. Configure Environment Variables (`.env`)
+Create a `.env` file in the root directory (`/document-hub/.env`) with the following variables:
 ```env
 # --- DATABASE CREDENTIALS ---
 DB_USER=postgres_admin
@@ -241,91 +270,233 @@ DATABASE_PLATFORM=org.hibernate.dialect.PostgreSQLDialect
 MONGO_URL=mongodb://localhost:27017/document_hub_logs
 
 # --- AWS S3 CREDENTIALS ---
-BUCKET_NAME=tên_bucket_của_bạn
-ACCESS_KEY=aws_access_key_của_bạn
-SECRET_KEY=aws_secret_key_của_bạn
-AWS_REGION=vùng_s3_của_bạn (ví dụ: ap-southeast-1)
+BUCKET_NAME=your_bucket_name
+ACCESS_KEY=your_aws_access_key
+SECRET_KEY=your_aws_secret_key
+AWS_REGION=your_s3_region (e.g., ap-southeast-1)
 ```
 
-> [!WARNING]
-> Không chia sẻ file `.env` lên GitHub hoặc các nền tảng public. Đây là thông tin bảo mật tuyệt đối về cơ sở dữ liệu và đám mây của bạn.
+Note: Do not commit the `.env` file to public repositories like GitHub. It contains sensitive credentials to your database and cloud resources.
 
----
-
-### 3. Khởi Chạy Hạ Tầng Cơ Sở Dữ Liệu
-Chạy lệnh sau tại thư mục gốc để khởi động PostgreSQL, MongoDB và Redis qua Docker:
-
+### 3. Spin Up Database Infrastructure
+Run the following command in the root directory to start PostgreSQL, MongoDB, and Redis:
 ```bash
 docker compose up -d
 ```
+Verify the running containers with `docker ps` to ensure:
+* PostgreSQL is running on port `5433` (mapped from container port `5432`).
+* MongoDB is running on port `27017`.
+* Redis is running on port `6380` (mapped from container port `6379`).
 
-Kiểm tra trạng thái các container bằng lệnh `docker ps` để đảm bảo:
-*   PostgreSQL đang chạy cổng `5433` (được mapping từ cổng gốc `5432` trong container)
-*   MongoDB đang chạy cổng `27017`
-*   Redis đang chạy cổng `6380`
-
----
-
-### 4. Chạy Backend (Spring Boot)
-Mở cửa sổ terminal mới, di chuyển vào thư mục `backend` và chạy lệnh:
-
+### 4. Run the Backend (Spring Boot)
+Open a new terminal window, navigate to the `backend` directory, and execute:
 ```bash
 cd backend
-# Chạy dự án qua Maven Wrapper
 ./mvnw.cmd spring-boot:run
 ```
-*   Server backend sẽ chạy tại: `http://localhost:8080`
-*   Mã nguồn tự động khởi tạo dữ liệu mặc định ban đầu thông qua `DataInitializer.java` (gồm Role Admin/User và các phân quyền mẫu).
+* The backend server will run at: `http://localhost:8080`
+* Initial seed data (Admin/User accounts and sample permissions) is automatically loaded via `DataInitializer.java` upon startup.
 
----
-
-### 5. Chạy Frontend (React + Vite)
-Mở cửa sổ terminal mới, di chuyển vào thư mục `frontend` và chạy:
-
+### 5. Run the Frontend (React + Vite)
+Open a new terminal window, navigate to the `frontend` directory, and execute:
 ```bash
 cd frontend
-# Cài đặt thư viện
 npm install
-# Khởi chạy môi trường local dev
 npm run dev
 ```
-*   Giao diện người dùng sẽ chạy tại: `http://localhost:5173`
+* The React application will run at: `http://localhost:5173`
 
 ---
 
-## 🌐 Danh Sách API Endpoints Chính
+## Main API Endpoints
 
-| Module | Phương Thức | Endpoint | Yêu Cầu Phân Quyền | Mô Tả |
+| Module | Method | Endpoint | Authorization | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| **Auth** | `POST` | `/auth/login` | Công khai | Đăng nhập tài khoản, trả về JWT Token |
-| | `POST` | `/auth/refresh` | Công khai | Làm mới Access Token thông qua Refresh Token |
-| | `POST` | `/auth/logout` | Đã đăng nhập | Đăng xuất, đưa token hiện tại vào blacklist Redis |
-| **User** | `POST` | `/users/create` | Công khai | Đăng ký tài khoản mới |
-| | `GET` | `/users/my-info` | Đã đăng nhập | Xem thông tin tài khoản đang đăng nhập |
-| | `GET` | `/users` | `Role: ADMIN` | Xem danh sách tất cả các người dùng hệ thống |
-| **Doc** | `POST` | `/documents/upload`| Đã đăng nhập | Tải file lên hệ thống, đẩy thẳng lên AWS S3 |
-| | `GET` | `/documents` | Đã đăng nhập | Xem danh sách file của hệ thống (hỗ trợ phân trang) |
-| | `GET` | `/documents/{id}/download` | Đã đăng nhập | Sinh presigned url tải file (hiệu lực 10 phút) |
-| | `DELETE`| `/documents/{id}` | Đã đăng nhập | Xóa tạm thời tài liệu (chuyển vào thùng rác) |
-| **Trash**| `GET` | `/documents/trash` | Đã đăng nhập | Xem danh sách tài liệu trong thùng rác |
-| | `PUT` | `/documents/{id}/restore`| Đã đăng nhập | Khôi phục tài liệu đã xóa tạm thời |
-| | `DELETE`| `/documents/{id}/permanent`| Đã đăng nhập | Xóa vĩnh viễn tài liệu khỏi DB & AWS S3 |
-| **Category**| `POST` | `/categories` | `Role: ADMIN` | Tạo danh mục phân loại mới |
-| | `GET` | `/categories` | Đã đăng nhập | Xem danh sách tất cả các danh mục |
-| **Share**| `POST` | `/documents/{id}/share`| Đã đăng nhập | Tạo liên kết chia sẻ (cấu hình passcode, hạn dùng...) |
-| | `GET` | `/documents/{id}/shares`| Đã đăng nhập | Lấy danh sách các liên kết chia sẻ của tài liệu |
-| | `DELETE`| `/shares/{token}`| Đã đăng nhập | Thu hồi (hủy) hiệu lực link chia sẻ |
-| | `POST` | `/shares/{token}/download`| Công khai | Tải file được chia sẻ (kiểm tra passcode & hạn dùng) |
+| **Auth** | `POST` | `/auth/login` | Public | Logs in user, returns JWT Token |
+| | `POST` | `/auth/refresh` | Public | Refreshes Access Token via Refresh Token |
+| | `POST` | `/auth/logout` | Authenticated | Logs out user, blacklists token in Redis |
+| **User** | `POST` | `/users/create` | Public | Registers a new account |
+| | `GET` | `/users/my-info` | Authenticated | Gets profile details of logged-in user |
+| | `GET` | `/users` | `Role: ADMIN` | Lists all registered users |
+| **Doc** | `POST` | `/documents/upload` | Authenticated | Uploads file directly to AWS S3 |
+| | `GET` | `/documents` | Authenticated | Retrieves documents (with pagination) |
+| | `GET` | `/documents/{id}/download` | Authenticated | Generates a 10-minute S3 presigned URL |
+| | `DELETE` | `/documents/{id}` | Authenticated | Soft deletes a document (moves to trash) |
+| **Trash** | `GET` | `/documents/trash` | Authenticated | Lists soft-deleted documents |
+| | `PUT` | `/documents/{id}/restore` | Authenticated | Restores a soft-deleted document |
+| | `DELETE` | `/documents/{id}/permanent` | Authenticated | Hard deletes document from DB & S3 |
+| **Category** | `POST` | `/categories` | `Role: ADMIN` | Creates a new category |
+| | `GET` | `/categories` | Authenticated | Lists all categories |
+| **Share** | `POST` | `/documents/{id}/share` | Authenticated | Creates a shared link (passcode, expiration, etc.) |
+| | `GET` | `/documents/{id}/shares` | Authenticated | Lists all active share links for a document |
+| | `DELETE` | `/shares/{token}` | Authenticated | Revokes (deletes) a share link |
+| | `POST` | `/shares/{token}/download` | Public | Downloads shared file (validating passcode & expiry) |
 
 ---
 
-## 🔒 Các Điểm Cộng Bảo Mật & Kỹ Thuật Lớn Trên CV
-Nếu bạn dùng dự án này để ứng tuyển, hãy nhấn mạnh các khía cạnh kỹ thuật sau với nhà tuyển dụng:
-1.  **Cơ chế Stateless Security:** Xử lý toàn bộ bằng JWT, không lưu Session trên Ram của Server, dễ dàng scale-out server sau này.
-2.  **Chống rò rỉ liên kết tải:** Ẩn toàn bộ url gốc của AWS S3. Thay vào đó sử dụng S3 Presigned URL có thời gian sống giới hạn.
-3.  **Blacklist Token bằng Redis:** Giải quyết nhược điểm của JWT stateless (không thể thu hồi token trước hạn) bằng cách ghi nhận blacklist trên RAM nhanh Redis.
-4.  **Tách biệt Cơ sở dữ liệu Log:** Không lưu log hoạt động vào PostgreSQL để tránh hiện tượng ghi đè ghi khóa ổ đĩa (I/O block), đẩy bất đồng bộ thông qua AOP Aspect vào MongoDB.
-5.  **An toàn Thùng rác:** Soft Delete để tránh thảm họa mất dữ liệu do sơ ý từ người dùng, đồng thời tối ưu bộ nhớ đám mây khi thực hiện Hard Delete (xóa cả S3 Object).
-6.  **Tránh lỗi Signature Mismatch do Tên File Chứa Khoảng Trắng:** Thiết kế hệ thống URL-decoding chuẩn chỉ cho S3 Key trước khi gọi API đám mây, triệt tiêu lỗi `NoSuchKey` phổ biến.
-7.  **Kết nối WebSockets & Session Management:** Triển khai quản lý phiên kết nối WebSocket đồng bộ hóa theo tài khoản định danh người dùng (`WebSocketSessionManager`), giúp truyền tải thông báo thời gian thực hiệu suất cao.
-8.  **Global Exception Handling:** Xây dựng cơ chế xử lý ngoại lệ tập trung (`@RestControllerAdvice`), bảo mật thông tin nội bộ của máy chủ và trả về chuẩn API Response thân thiện cho client.
+## Security & Resume Highlights
+
+Key technical and security milestones built into this project:
+1. Stateless Security Design: Managed entirely using JWTs, eliminating server memory consumption for session data, which makes the server highly scalable.
+2. Preventing S3 Link Leaks: Keeps the bucket entirely private. Securely serves files via temporary, time-limited Amazon S3 Presigned URLs.
+3. Token Revocation with Redis: Solves the stateless JWT logout problem by storing revoked tokens in Redis until their expiration date.
+4. Log Database Isolation: Prevents PostgreSQL disk write contention (I/O bottlenecks) by logging user activity asynchronously into MongoDB using Spring AOP.
+5. Robust Trash Lifecycle: Combines Soft Delete to protect against accidental user deletion and Hard Delete to release S3 storage.
+6. Resolving S3 Signature Mismatches on Special Characters: Handles URL-decoding for S3 object keys dynamically to prevent `NoSuchKey` and Signature Mismatch exceptions when handling filenames with spaces or Vietnamese characters.
+7. WebSocket Session Management: Manages WebSocket sessions dynamically with `WebSocketSessionManager` to route alerts and messages accurately to user connections.
+8. Global Exception Handling: Centralizes exception catching (`@RestControllerAdvice`) to hide internal stack traces from clients and return structured JSON responses.
+
+---
+
+## Technical Deep-Dive: Workflows, Cloud Configurations & Troubleshooting
+
+### 1. File Upload Workflow (Sequence Diagram)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Client as Client Browser (React)
+    participant Security as Spring Security Filter
+    participant Controller as DocumentController
+    participant Service as S3StorageService
+    participant DB as PostgreSQL Database
+    participant S3 as AWS S3 Bucket
+
+    Client->>Security: POST /documents/upload (MultipartFile, categoryId, JWT Token)
+    activate Security
+    Note over Security: Authenticates JWT & populates SecurityContextHolder
+    Security->>Controller: uploadFile(file, categoryId, authentication)
+    deactivate Security
+    activate Controller
+    
+    Controller->>Service: uploadDocument(file, email, categoryId)
+    activate Service
+    
+    Service->>DB: findByEmail(email)
+    DB-->>Service: Returns User Entity (or throws USER_NOT_EXISTED)
+    
+    alt categoryId present
+        Service->>DB: findById(categoryId)
+        DB-->>Service: Returns Category Entity (or throws CATEGORY_NOT_FOUND)
+    end
+
+    Note over Service: 1. Generates unique UUID filename<br/>2. Sets ObjectMetadata (Content-Length, Content-Type)
+    
+    Service->>S3: putObject(bucket, uniqueName, inputStream, metadata)
+    activate S3
+    S3-->>Service: Upload success
+    deactivate S3
+    
+    Service->>S3: getUrl(bucket, uniqueName)
+    S3-->>Service: Returns S3 Object URL
+    
+    Note over Service: Instantiates Document entity
+    Service->>DB: save(document)
+    DB-->>Service: Document saved successfully
+    
+    Service-->>Controller: Returns Document Entity
+    deactivate Service
+    
+    Note over Controller: Maps Document to DocumentResponse DTO
+    Controller-->>Client: Returns ApiResponse<DocumentResponse> (JSON)
+    deactivate Controller
+```
+
+#### Process Breakdown:
+1. **Request Sent:** React App sends a `multipart/form-data` POST request to `/documents/upload` with the binary file and `categoryId`. The request contains the `Authorization: Bearer <token>` header.
+2. **Security Interception:** Spring Security validates the JWT, initializes the authentication object in the context, and routes the request.
+3. **Controller Handling:** `DocumentController` extracts the file from `@RequestParam("file")`, resolves the user's email via `Authentication.getName()`, and invokes `S3StorageService.uploadDocument()`.
+4. **Service Logic:**
+    * **Validation:** Verifies the user and category exist, throwing custom `AppException` if missing.
+    * **Filename Safety:** Renames the file to `UUID_filename` to avoid S3 collisions.
+    * **Streaming to S3:** Populates `ObjectMetadata` with `Content-Length` and `Content-Type` for efficient S3 chunked transfer. Uploads using `amazonS3.putObject()` and retrieves its reference URL.
+    * **Database Log:** Saves a metadata record of the document mapping S3 keys, sizes, uploader, and category to PostgreSQL.
+5. **Response Return:** The entity is mapped to a DTO and returned as a JSON `ApiResponse`.
+
+---
+
+### 2. Cloud Configuration & Access Troubleshooting
+
+To prevent credentials from leaking, the project avoids hardcoded values and utilizes standard environment variable interpolation.
+
+#### Access Protection:
+* Placeholders are defined in application configurations (e.g., `aws.s3.access-key: ${ACCESS_KEY}`). Refer to [application-example.yml](file:///d:/DH/HOCKI2_25_26/JAVA/document-hub/backend/src/main/resources/application-example.yml).
+* Values are injected at runtime via the `.env` file (which is ignored by Git).
+* *Production Recommendation:* Assign an IAM Instance Profile or Service Account Role to the runtime machine, using `DefaultAWSCredentialsProviderChain` instead of hardcoded static keys.
+
+#### Resolving AWS S3 403 Access Denied Errors in Dev:
+1. **Region Mismatch:** Ensure the bucket region in the AWS console matches `AWS_REGION` (e.g., `ap-southeast-2`).
+2. **IAM Permissions:** Verify that the IAM user keys configured have `s3:PutObject`, `s3:GetObject`, and `s3:DeleteObject` for `arn:aws:s3:::your-bucket/*` and `s3:ListBucket` for `arn:aws:s3:::your-bucket`.
+3. **Block Public Access Conflict:** Do not upload files with public read ACLs if S3 "Block all public access" is enabled. Keep the bucket private and generate Presigned URLs for retrieval instead.
+4. **CLI Validation:** Run `aws configure` with the dev credentials and verify access via `aws s3 ls s3://your-bucket-name`. If this fails, the issue lies in AWS IAM Policies, not Spring Boot.
+
+---
+
+### 3. Global Exception Handling
+
+The server prevents stack trace leaks and maintains a clean contract with the frontend client using a `@RestControllerAdvice`.
+
+#### Exception Handler Configuration:
+We catch specific validation errors and wrap them in custom formatted `ApiResponse` payloads. You can see how this works in [GlobalExceptionHandler.java](file:///d:/DH/HOCKI2_25_26/JAVA/document-hub/backend/src/main/java/backend/example/backend/common/exception/GlobalExceptionHandler.java):
+
+```java
+package backend.example.backend.common.exception;
+
+import backend.example.backend.common.response.ApiResponse;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+
+    // 1. Handles application exceptions (e.g., invalid file format)
+    @ExceptionHandler(value = AppException.class)
+    public ResponseEntity<ApiResponse<?>> handlingAppException(AppException exception) {
+        ErrorCode errorCode = exception.getErrorCode();
+        ApiResponse<?> apiResponse = ApiResponse.builder()
+                .code(errorCode.getCode())
+                .message(errorCode.getMessage())
+                .build();
+        return ResponseEntity.status(errorCode.getStatusCode()).body(apiResponse);
+    }
+
+    // 2. Handles file size limit violations
+    @ExceptionHandler(value = MaxUploadSizeExceededException.class)
+    public ResponseEntity<ApiResponse<?>> handlingMaxUploadSizeExceededException(MaxUploadSizeExceededException exception) {
+        ApiResponse<?> apiResponse = ApiResponse.builder()
+                .code(1014)
+                .message("File upload size exceeds limit (Max: 10MB)!")
+                .build();
+        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).body(apiResponse);
+    }
+
+    // 3. Fallback for unhandled exceptions to prevent stack trace leaks
+    @ExceptionHandler(value = Exception.class)
+    public ResponseEntity<ApiResponse<?>> handlingRuntimeException(Exception exception) {
+        ApiResponse<?> apiResponse = ApiResponse.builder()
+                .code(ErrorCode.UNCATEGORIZED_EXCEPTION.getCode())
+                .message(ErrorCode.UNCATEGORIZED_EXCEPTION.getMessage())
+                .build();
+        return ResponseEntity.status(ErrorCode.UNCATEGORIZED_EXCEPTION.getStatusCode()).body(apiResponse);
+    }
+}
+```
+
+#### Sample JSON Responses:
+* **Max File Size Limit Exceeded (HTTP Status 413):**
+  ```json
+  {
+    "code": 1014,
+    "message": "File upload size exceeds limit (Max: 10MB)!"
+  }
+  ```
+* **Invalid File Format (HTTP Status 400):**
+  ```json
+  {
+    "code": 1013,
+    "message": "Invalid file format! Only PDF, DOCX, PNG, and JPEG are supported."
+  }
+  ```

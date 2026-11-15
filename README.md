@@ -50,7 +50,7 @@ graph TD
     SpringBoot <-->|Presigned URLs| S3[Amazon S3]
 ```
 
-ER diagram, upload sequence diagram, S3 troubleshooting, and error-handling notes: see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+ER diagram, upload sequence diagram, S3 troubleshooting, and error-handling notes: see [ARCHITECTURE.md](/ARCHITECTURE.md).
 
 ## Tech Stack
 

@@ -1,6 +1,7 @@
 package backend.example.backend.modules.log;
 
 import backend.example.backend.common.response.ApiResponse;
+import backend.example.backend.modules.document.DocumentRepository;
 import backend.example.backend.modules.document.dto.DocumentResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +24,7 @@ import java.time.LocalDateTime;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ActivityLogAspect {
     ActivityLogRepository activityLogRepository;
-    backend.example.backend.modules.document.DocumentRepository documentRepository;
+    DocumentRepository documentRepository;
 
     @Pointcut("execution(* backend.example.backend.modules.document.DocumentController.*(..))")
     public void documentControllerMethods() {}

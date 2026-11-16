@@ -1,35 +1,41 @@
 server:
-  port: ${PORT}
+  port: ${PORT:8080}
 
 spring:
   datasource:
     url: ${DB_URL}
     username: ${DB_USER}
     password: ${DB_PASSWORD}
-    driver-class-name: ${DB_DRIVER_CLASS}
+    driver-class-name: ${DB_DRIVER_CLASS:org.postgresql.Driver}
   servlet:
     multipart:
-      max-file-size: ${MAX_FILE_SIZE}
-      max-request-size: ${MAX_REQUEST_SIZE}
+      max-file-size: ${MAX_FILE_SIZE:10MB}
+      max-request-size: ${MAX_REQUEST_SIZE:10MB}
   jpa:
     hibernate:
-      ddl-auto: ${DDL_AUTO}
-    show-sql: ${SHOW_SQL}
+      ddl-auto: ${DDL_AUTO:update}
+    show-sql: ${SHOW_SQL:false}
     properties:
       hibernate:
-        format_sql : ${FORMAT_SQL}
-    database-platform: ${DATABASE_PLATFORM}
+        format_sql: ${FORMAT_SQL:true}
+    database-platform: ${DATABASE_PLATFORM:org.hibernate.dialect.PostgreSQLDialect}
 
   data:
     mongodb:
       uri: ${MONGO_URL}
     redis:
-      host: ${REDIS_HOST}
-      port: ${REDIS_PORT}
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
 
 aws:
   s3:
     bucket-name: ${BUCKET_NAME}
     access-key: ${ACCESS_KEY}
     secret-key: ${SECRET_KEY}
-    region: ${AWS_REGION}
+    region: ${AWS_REGION:ap-southeast-2}
+
+jwt:
+  signerKey: ${JWT_SIGNER_KEY}
+
+app:
+  frontend-url: ${FRONTEND_URL:http://localhost:5173}

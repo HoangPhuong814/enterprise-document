@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 public class ShareResponse {
     String shareToken;
     String shareUrl;
-    String passcode;
+    boolean hasPasscode;
     LocalDateTime expiredAt;
     Integer maxDownloads;
     int downloadCount;

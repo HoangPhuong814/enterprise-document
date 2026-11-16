@@ -25,7 +25,10 @@ public enum ErrorCode {
     SHARE_NOT_FOUND(1011, "Share link not found or expired", HttpStatus.NOT_FOUND),
     SHARE_PASSCODE_INVALID(1012, "Invalid passcode for share link", HttpStatus.BAD_REQUEST),
     ANNOUNCEMENT_EXISTED(1013, "announcement existed", HttpStatus.BAD_REQUEST),
-    ANNOUNCEMENT_NOT_FOUND(1014, "announcement not found", HttpStatus.NOT_FOUND);
+    ANNOUNCEMENT_NOT_FOUND(1014, "announcement not found", HttpStatus.NOT_FOUND),
+    INVALID_FILE_FORMAT(1015, "Invalid file format! Only PDF, DOCX, PNG, and JPEG are supported.", HttpStatus.BAD_REQUEST),
+    ACCESS_DENIED(1020, "You do not have permission to access this resource", HttpStatus.FORBIDDEN),
+    TOO_MANY_ATTEMPTS(1021, "Too many failed attempts, try again later", HttpStatus.TOO_MANY_REQUESTS);
 
     int code;
     String message;

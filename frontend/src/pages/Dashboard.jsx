@@ -1059,7 +1059,15 @@ export default function Dashboard() {
                       </div>
                       <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", gap: "8px", fontSize: "11px", color: "var(--text-secondary)" }}>
                         <span>
-                          🔑 Pass: {share.passcode ? <strong style={{ color: "var(--text-primary)" }}>{share.passcode}</strong> : <em>None</em>}
+                          {share.hasPasscode ? (
+                            <span style={{ color: "var(--warning)", display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                              <Lock size={12} /> {language === "en" ? "Passcode protected" : "Có mật mã"}
+                            </span>
+                          ) : (
+                            <span style={{ color: "var(--text-muted)" }}>
+                              {language === "en" ? "Public link" : "Link công khai"}
+                            </span>
+                          )}
                         </span>
                         <span>
                           📥 Downloads: {share.downloadCount}{share.maxDownloads ? `/${share.maxDownloads}` : " (Unlimited)"}
@@ -1262,13 +1270,10 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {shareResult.passcode && (
-                <p style={{ fontSize: "13px", color: "var(--text-secondary)", margin: 0 }}>
-                  🔑{" "}
-                  {language === "en" ? "Access passcode:" : "Mật mã truy cập:"}{" "}
-                  <strong style={{ color: "var(--text-primary)" }}>
-                    {shareResult.passcode}
-                  </strong>
+              {shareResult.hasPasscode && (
+                <p style={{ fontSize: "13px", color: "var(--text-secondary)", margin: 0, display: "flex", alignItems: "center", gap: "6px" }}>
+                  <Lock size={14} color="var(--warning)" />{" "}
+                  {language === "en" ? "Protected by the passcode you set." : "Được bảo vệ bằng mật mã bạn đã thiết lập."}
                 </p>
               )}
 

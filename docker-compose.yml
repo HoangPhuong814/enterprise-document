@@ -1,11 +1,10 @@
-version: "3.8"
-
 services:
   # 1. PostgreSQL
   postgres:
     image: postgres:16-alpine
     container_name: document-hub-postgres
     restart: unless-stopped
+    env_file: .env
     environment:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
@@ -16,6 +15,11 @@ services:
       - postgres_data_v2:/var/lib/postgresql/data
     networks:
       - document_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 10s
+      retries: 5
+      start_period: 10s
 
   # 2. MongoDB
   mongodb:
@@ -28,9 +32,14 @@ services:
       - mongodb_data:/data/db
     networks:
       - document_network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      retries: 5
+      start_period: 10s
 
-  # 3. Redis (Bạn lỡ xóa mất nên mình thêm lại)
-  dochub:
+  # 3. Redis
+  redis:
     image: redis:7-alpine
     container_name: document-hub-redis
     restart: unless-stopped
@@ -38,24 +47,38 @@ services:
       - "6380:6379"
     networks:
       - document_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      retries: 5
+      start_period: 5s
 
-  # 4. App Spring Boot của bạn
+  # 4. Spring Boot backend
   backend:
-    image: document-hub-app:1.0
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
     container_name: document-hub-backend
+    restart: unless-stopped
+    env_file: .env
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://document-hub-postgres:5432/${DB_NAME}
-      - SPRING_DATA_MONGODB_URI=mongodb://document-hub-mongodb:27017/document_hub_logs
-      - SPRING_REDIS_HOST=document-hub-redis # Đổi lại gọi theo container_name cho chuẩn
-      - SPRING_REDIS_PORT=6379
+      DB_URL: jdbc:postgresql://document-hub-postgres:5432/${DB_NAME}
+      MONGO_URL: mongodb://document-hub-mongodb:27017/document_hub_logs
+      REDIS_HOST: document-hub-redis
+      REDIS_PORT: 6379
+    ports:
+      - "8080:8080"
     depends_on:
-      - postgres
-      - mongodb
-      - dochub
+      postgres:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
-      - document_network # Quan trọng: Phải cho vào cùng mạng với DB
+      - document_network
 
-  # 5. Cô lễ tân Nginx
+  # 5. Nginx reverse proxy
   nginx:
     image: nginx:alpine
     container_name: document-hub-nginx
@@ -66,9 +89,8 @@ services:
     depends_on:
       - backend
     networks:
-      - document_network # Nginx cũng phải chung mạng với Backend
+      - document_network
 
-# Khai báo Volumes và Networks chung
 volumes:
   postgres_data_v2:
   mongodb_data:

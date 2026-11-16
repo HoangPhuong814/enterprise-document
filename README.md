@@ -36,6 +36,10 @@ An internal document management and sharing system built with **Spring Boot 3**,
 | S3 signature / `NoSuchKey` errors with spaces and Vietnamese filenames | URL-decode and normalize object keys; upload under `UUID_filename` to avoid collisions                               |
 | Routing WebSocket messages to the right users                          | `WebSocketSessionManager` maps users to live sessions                                                                |
 | Leaking internals through errors                                       | Central `@RestControllerAdvice` returns a consistent JSON error contract and hides stack traces                      |
+| Concurrent downloads could exceed `max_downloads`                      | `PESSIMISTIC_WRITE` lock on the share row inside a `@Transactional` block prevents the race                         |
+| Passcode comparison was case-sensitive (users mistype casing)          | Normalize to lower-case on create and on verify                                                                      |
+| No `.env.example` — first-time contributors guessed variable names     | Added `.env.example` covering every variable `application.yml` references                                            |
+| Credentials were hardcoded in `application.yml`                        | Replaced with `${VAR:default}` placeholders; secrets live only in `.env` (git-ignored)                               |
 
 ## Architecture
 
@@ -118,7 +122,5 @@ document-hub/
 ## Roadmap
 
 - [ ] Integration tests with Testcontainers (auth flow, share-link rules)
-- [ ] GitHub Actions CI: build and test on every push
 - [ ] Rate limiting on the public share-download endpoint
-- [ ] Atomic enforcement of `max_downloads` under concurrent downloads
 - [ ] Swagger / OpenAPI documentation

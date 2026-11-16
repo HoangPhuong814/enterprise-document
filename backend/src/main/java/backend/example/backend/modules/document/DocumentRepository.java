@@ -14,6 +14,7 @@ import java.util.Optional;
 public interface DocumentRepository extends JpaRepository<Document, Long> {
     Page<Document> findAllByIsDeletedFalse(Pageable pageable);
     Page<Document> findAllByIsDeletedTrue(Pageable pageable);
+    Page<Document> findAllByIsDeletedTrueAndUploaderEmail(String email, Pageable pageable);
     Optional<Document> findByIdAndIsDeletedFalse(Long id);
 
     @Query("SELECT d FROM Document d WHERE d.isDeleted = false AND (" +
